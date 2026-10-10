@@ -9,8 +9,6 @@ class RegisterUserRequest extends FormRequest
 {
     public function rules(): array
     {
-        // Pendaftaran tiap role berbeda-beda.
-        // Untuk sekarang: user posyandu (kader) yang didaftarkan oleh Dinas Kesehatan.
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
@@ -18,8 +16,6 @@ class RegisterUserRequest extends FormRequest
             'role' => ['required', 'in:kader'],
         ];
 
-        // Field khusus kader: wajib terdaftar pada sebuah posyandu
-        // yang berada di bawah puskesmas yang sedang login.
         if ($this->input('role') === 'kader') {
             $rules['posyandu_id'] = [
                 'required',

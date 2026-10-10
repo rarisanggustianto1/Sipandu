@@ -20,7 +20,6 @@ class PosyanduController extends Controller
 
     public function store(StorePosyanduRequest $request): JsonResponse
     {
-        // puskesmas_id diambil dari user yang login, bukan dari request
         $posyandu = Posyandu::create(
             $request->validated() + ['puskesmas_id' => auth()->user()->puskesmas_id]
         );
@@ -50,7 +49,6 @@ class PosyanduController extends Controller
 
     private function findOwnedPosyandu(string $id): Posyandu
     {
-        // Scoping: hanya posyandu milik puskesmas yang login (404 jika bukan miliknya)
         return Posyandu::where('puskesmas_id', auth()->user()->puskesmas_id)
             ->findOrFail($id);
     }

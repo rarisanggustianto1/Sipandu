@@ -41,8 +41,6 @@ class LoginController extends Controller
 
     private function home(): string
     {
-        // Dashboard tiap role masih dibangun tim lain.
-        // Untuk sekarang hanya Admin Puskesmas yang sudah punya dashboard.
         return match (Auth::user()->role) {
             'tenaga_kesehatan' => route('puskesmas.dashboard'),
             default => '/',

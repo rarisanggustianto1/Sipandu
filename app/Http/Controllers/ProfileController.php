@@ -17,7 +17,6 @@ class ProfileController extends Controller
     {
         $data = $request->validated();
 
-        // Password kosong = tidak diubah
         if (blank($data['password'])) {
             unset($data['password']);
         }

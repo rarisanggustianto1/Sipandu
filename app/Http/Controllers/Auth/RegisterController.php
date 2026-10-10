@@ -13,8 +13,6 @@ class RegisterController extends Controller
 {
     public function create(): View
     {
-        // Pendaftaran kader dilakukan oleh Admin Puskesmas.
-        // Hanya posyandu milik puskesmas ini yang bisa dipilih.
         $posyandus = Posyandu::where('puskesmas_id', auth()->user()->puskesmas_id)
             ->latest()
             ->get();

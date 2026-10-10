@@ -51,7 +51,6 @@ class PengaduanController extends Controller
 
     private function findOwnedPengaduan(string $id): Pengaduan
     {
-        // Scoping: hanya pengaduan dari posyandu milik puskesmas yang login
         return Pengaduan::whereHas('posyandu', function ($query) {
             $query->where('puskesmas_id', auth()->user()->puskesmas_id);
         })->findOrFail($id);

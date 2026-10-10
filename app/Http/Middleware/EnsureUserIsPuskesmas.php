@@ -10,8 +10,6 @@ class EnsureUserIsPuskesmas
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // Admin Puskesmas dikenali dari role 'tenaga_kesehatan'
-        // yang terdaftar pada puskesmas tertentu (puskesmas_id terisi).
         $user = auth()->user();
 
         if (! auth()->check() || $user->role !== 'tenaga_kesehatan' || ! $user->puskesmas_id) {

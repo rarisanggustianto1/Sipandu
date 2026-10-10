@@ -13,9 +13,11 @@ class RegisterController extends Controller
 {
     public function create(): View
     {
-        // Pendaftaran user posyandu (kader) dilakukan oleh Dinas Kesehatan.
-        // Dinas melihat seluruh posyandu di wilayah kerjanya.
-        $posyandus = Posyandu::with('puskesmas')->latest()->get();
+        // Pendaftaran kader dilakukan oleh Admin Puskesmas.
+        // Hanya posyandu milik puskesmas ini yang bisa dipilih.
+        $posyandus = Posyandu::where('puskesmas_id', auth()->user()->puskesmas_id)
+            ->latest()
+            ->get();
 
         return view('auth.register', compact('posyandus'));
     }
@@ -25,7 +27,7 @@ class RegisterController extends Controller
         $user = User::create($request->validated());
 
         return redirect()
-            ->route('register')
+            ->route('puskesmas.kader.create')
             ->with('status', "Akun {$user->name} berhasil didaftarkan sebagai kader posyandu.");
     }
 }

@@ -17,10 +17,6 @@ Route::get('login', [LoginController::class, 'create'])->name('login')->middlewa
 Route::post('login', [LoginController::class, 'store'])->middleware('guest');
 Route::post('logout', [LoginController::class, 'destroy'])->name('logout')->middleware('auth');
 
-// Pendaftaran user posyandu (kader) melalui Dinas Kesehatan
-Route::get('register', [RegisterController::class, 'create'])->name('register')->middleware(['auth', 'dinas']);
-Route::post('register', [RegisterController::class, 'store'])->middleware(['auth', 'dinas']);
-
 // Profil pengguna
 Route::get('profile', [ProfileController::class, 'index'])->name('profile')->middleware('auth');
 Route::put('profile', [ProfileController::class, 'update'])->middleware('auth');
@@ -38,4 +34,8 @@ Route::prefix('puskesmas')
         // Pengaduan: list, detail, dan tanggapan (response) dari Puskesmas
         Route::apiResource('pengaduan', PengaduanController::class)
             ->only(['index', 'show', 'update']);
+
+        // Pendaftaran kader posyandu oleh Admin Puskesmas
+        Route::get('kader', [RegisterController::class, 'create'])->name('kader.create');
+        Route::post('kader', [RegisterController::class, 'store'])->name('kader.store');
     });

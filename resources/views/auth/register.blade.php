@@ -9,7 +9,7 @@
         Pendaftaran akun kader posyandu dilakukan oleh Dinas Kesehatan.
     </p>
 
-    <form method="POST" action="{{ route('register') }}" class="space-y-4">
+    <form method="POST" action="{{ route('puskesmas.kader.store') }}" class="space-y-4">
         @csrf
 
         <div>
@@ -39,7 +39,7 @@
                 <option value="">— Pilih Posyandu —</option>
                 @foreach ($posyandus as $posyandu)
                     <option value="{{ $posyandu->id }}" {{ old('posyandu_id') == $posyandu->id ? 'selected' : '' }}>
-                        {{ $posyandu->nama_posyandu }} — {{ $posyandu->puskesmas->nama_puskesmas }}
+                        {{ $posyandu->nama_posyandu }}
                     </option>
                 @endforeach
             </select>

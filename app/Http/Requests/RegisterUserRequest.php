@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class RegisterUserRequest extends FormRequest
 {
@@ -17,9 +18,14 @@ class RegisterUserRequest extends FormRequest
             'role' => ['required', 'in:kader'],
         ];
 
-        // Field khusus kader: wajib terdaftar pada sebuah posyandu.
+        // Field khusus kader: wajib terdaftar pada sebuah posyandu
+        // yang berada di bawah puskesmas yang sedang login.
         if ($this->input('role') === 'kader') {
-            $rules['posyandu_id'] = ['required', 'exists:posyandu,id'];
+            $rules['posyandu_id'] = [
+                'required',
+                Rule::exists('posyandu', 'id')
+                    ->where('puskesmas_id', auth()->user()->puskesmas_id),
+            ];
         }
 
         return $rules;

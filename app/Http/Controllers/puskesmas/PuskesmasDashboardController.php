@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Puskesmas;
 
 use App\Models\Pengaduan;
 use App\Models\Posyandu;

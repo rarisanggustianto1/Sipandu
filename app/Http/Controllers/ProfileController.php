@@ -7,6 +7,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use App\Http\Requests\UpdateProfileRequest;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -56,5 +58,21 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    public function index(): View
+    {
+        return view('profile.index', ['user' => auth()->user()]);
+    }
+
+    public function update(UpdateProfileRequest $request): RedirectResponse
+    {
+        $data = $request->validated();
+
+        if (blank($data['password'])) {
+            unset($data['password']);
+        }
+
+        $request->user()->update($data);
+
+        return redirect()->route('profile')->with('status', 'Profil berhasil diperbarui.');
     }
 }

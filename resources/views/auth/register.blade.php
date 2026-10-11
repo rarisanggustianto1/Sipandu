@@ -1,52 +1,66 @@
-<x-guest-layout>
-    <form method="POST" action="{{ route('register') }}">
+@extends('layouts.app')
+
+@section('title', '— Daftar User Posyandu')
+
+@section('content')
+<div class="mx-auto max-w-md rounded-lg bg-white p-6 shadow">
+    <h1 class="mb-1 text-xl font-bold">Daftar User Posyandu</h1>
+    <p class="mb-4 text-sm text-gray-600">
+        Pendaftaran akun kader posyandu dilakukan oleh Dinas Kesehatan.
+    </p>
+
+    <form method="POST" action="{{ route('puskesmas.kader.store') }}" class="space-y-4">
         @csrf
 
-        <!-- Name -->
         <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+            <label for="name" class="block text-sm font-medium">Nama Lengkap</label>
+            <input type="text" name="name" id="name" value="{{ old('name') }}" required
+                   class="mt-1 w-full rounded-md border-gray-300 shadow-sm">
         </div>
 
-        <!-- Email Address -->
-        <div class="mt-4">
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <div>
+            <label for="email" class="block text-sm font-medium">Email</label>
+            <input type="email" name="email" id="email" value="{{ old('email') }}" required
+                   class="mt-1 w-full rounded-md border-gray-300 shadow-sm">
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+        <div>
+            <label for="role" class="block text-sm font-medium">Role</label>
+            <select name="role" id="role" class="mt-1 w-full rounded-md border-gray-300 shadow-sm">
+                {{-- Pendaftaran role lain menyusul: form tiap role berbeda-beda --}}
+                <option value="kader" selected>Kader Posyandu</option>
+            </select>
         </div>
 
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+        <div>
+            <label for="posyandu_id" class="block text-sm font-medium">Posyandu</label>
+            <select name="posyandu_id" id="posyandu_id" required
+                    class="mt-1 w-full rounded-md border-gray-300 shadow-sm">
+                <option value="">— Pilih Posyandu —</option>
+                @foreach ($posyandus as $posyandu)
+                    <option value="{{ $posyandu->id }}" {{ old('posyandu_id') == $posyandu->id ? 'selected' : '' }}>
+                        {{ $posyandu->nama_posyandu }}
+                    </option>
+                @endforeach
+            </select>
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
-                {{ __('Already registered?') }}
-            </a>
-
-            <x-primary-button class="ms-4">
-                {{ __('Register') }}
-            </x-primary-button>
+        <div>
+            <label for="password" class="block text-sm font-medium">Kata Sandi</label>
+            <input type="password" name="password" id="password" required
+                   class="mt-1 w-full rounded-md border-gray-300 shadow-sm">
         </div>
+
+        <div>
+            <label for="password_confirmation" class="block text-sm font-medium">Ulangi Kata Sandi</label>
+            <input type="password" name="password_confirmation" id="password_confirmation" required
+                   class="mt-1 w-full rounded-md border-gray-300 shadow-sm">
+        </div>
+
+        <button type="submit"
+                class="w-full rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
+            Daftarkan
+        </button>
     </form>
-</x-guest-layout>
+</div>
+@endsection

@@ -7,6 +7,9 @@ use App\Http\Controllers\PengaduanController;
 use App\Http\Controllers\PosyanduController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PuskesmasDashboardController;
+use App\Http\Controllers\Peserta\KeluargaController;
+use App\Http\Controllers\Peserta\PesertaController;
+use App\Http\Controllers\Peserta\PesertaDashboardController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Dinas\DinasDashboardController;
 use App\Http\Controllers\Dinas\PuskesmasController;
@@ -64,3 +67,11 @@ Route::prefix('puskesmas')
         Route::get('kader', [RegisterController::class, 'create'])->name('kader.create');
         Route::post('kader', [RegisterController::class, 'store'])->name('kader.store');
     });
+Route::prefix('peserta')->name('peserta.')->group(function () {
+
+    Route::get('/', PesertaDashboardController::class)->name('dashboard');
+
+    Route::resource('keluarga', KeluargaController::class);
+
+    Route::resource('data', PesertaController::class);
+});

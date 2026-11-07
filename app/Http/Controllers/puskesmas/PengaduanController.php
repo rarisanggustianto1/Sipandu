@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers\Puskesmas;
 
+use App\Http\Controllers\Controller;
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/main
 use App\Http\Requests\RespondPengaduanRequest;
 use App\Models\Pengaduan;
 use Illuminate\Http\JsonResponse;
@@ -56,3 +61,4 @@ class PengaduanController extends Controller
         })->findOrFail($id);
     }
 }
+

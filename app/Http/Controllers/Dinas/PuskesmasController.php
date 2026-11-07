@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Dinas;
 use App\Http\Controllers\Controller;
 use App\Models\DinasKesehatan;
 use App\Models\Puskesmas;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class PuskesmasController extends Controller
@@ -31,20 +33,49 @@ class PuskesmasController extends Controller
         $validated = $request->validate([
             'dinas_kesehatan_id' => [
                 'required',
-                'exists:dinas_kesehatan,id'
+                'exists:dinas_kesehatan,id',
             ],
             'nama_puskesmas' => 'required|string|max:255',
             'alamat' => 'required|string',
             'kecamatan' => 'required|string|max:255',
             'telepon' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email'),
+            ],
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
+            ],
         ]);
 
-        Puskesmas::create($validated);
+        DB::transaction(function () use ($validated) {
+
+            $puskesmasData = collect($validated)
+                ->except(['password'])
+                ->all();
+
+            $puskesmas = Puskesmas::create($puskesmasData);
+
+            User::create([
+                'name' => $puskesmas->nama_puskesmas,
+                'email' => $validated['email'],
+                'password' => $validated['password'],
+                'role' => 'tenaga_kesehatan',
+                'puskesmas_id' => $puskesmas->id,
+            ]);
+        });
 
         return redirect()
             ->route('dinas.puskesmas.index')
-            ->with('success', 'Data Puskesmas berhasil ditambahkan.');
+            ->with(
+                'success',
+                'Data Puskesmas dan akun login berhasil ditambahkan.'
+            );
     }
 
     public function edit(Puskesmas $puskesma)
@@ -62,7 +93,7 @@ class PuskesmasController extends Controller
         $validated = $request->validate([
             'dinas_kesehatan_id' => [
                 'required',
-                'exists:dinas_kesehatan,id'
+                'exists:dinas_kesehatan,id',
             ],
             'nama_puskesmas' => 'required|string|max:255',
             'alamat' => 'required|string',

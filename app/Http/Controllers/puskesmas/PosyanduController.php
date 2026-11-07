@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers\Puskesmas;
 
+use App\Http\Controllers\Controller;
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/main
 use App\Http\Requests\StorePosyanduRequest;
 use App\Models\Posyandu;
 use Illuminate\Http\JsonResponse;
@@ -53,3 +58,4 @@ class PosyanduController extends Controller
             ->findOrFail($id);
     }
 }
+

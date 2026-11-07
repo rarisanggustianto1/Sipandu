@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -50,21 +51,34 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
-// ROUTE MODUL KADER POSYANDU (Punya Kamu)
+// ROUTE MODUL KADER POSYANDU
 Route::prefix('kader')->name('kader.')->group(function () {
     Route::resource('pemeriksaan', PemeriksaanController::class);
     Route::resource('jadwal', JadwalKegiatanController::class);
     Route::resource('imunisasi', ImunisasiController::class);
 });
 
-// ROUTE MODUL DINAS KESEHATAN (Punya Dila)
+// ROUTE MODUL DINAS KESEHATAN
 Route::prefix('dinas')->name('dinas.')->group(function () {
-    Route::get('/', [DinasDashboardController::class, 'index'])->name('dashboard');
-    Route::resource('puskesmas', PuskesmasController::class)->except(['show']);
-    Route::resource('edukasi', EdukasiController::class)->except(['show']);
+
+    Route::get('/', [DinasDashboardController::class, 'index'])
+        ->name('dashboard');
+
+    Route::resource('puskesmas', PuskesmasController::class)
+        ->except(['show']);
+
+    // Import PDF menjadi draf artikel edukasi
+    Route::post('edukasi/import-pdf', [EdukasiController::class, 'importPdf'])
+        ->name('edukasi.import-pdf');
+
+    Route::resource('edukasi', EdukasiController::class)
+        ->except(['show']);
+
+    Route::view('laporan', 'dinas.laporan.index')
+    ->name('laporan.index');
 });
 
-// ROUTE MODUL PUSKESMAS (Punya Deva)
+// ROUTE MODUL PUSKESMAS
 Route::prefix('puskesmas')
     ->middleware(['auth', 'puskesmas'])
     ->name('puskesmas.')
@@ -76,11 +90,15 @@ Route::prefix('puskesmas')
         Route::post('kader', [RegisterController::class, 'store'])->name('kader.store');
     });
 
-// ROUTE MODUL PESERTA / KELUARGA (Punya Ketrin)
+// ROUTE MODUL PESERTA / KELUARGA
 Route::prefix('peserta')->name('peserta.')->group(function () {
     Route::get('/', PesertaDashboardController::class)->name('dashboard');
     Route::resource('keluarga', KeluargaController::class);
     Route::resource('data', PesertaController::class);
+<<<<<<< HEAD
     Route::get('edukasi', [App\Http\Controllers\Peserta\EdukasiController::class, 'index'])->name('edukasi.index');
     Route::get('edukasi/{id}', [App\Http\Controllers\Peserta\EdukasiController::class, 'show'])->name('edukasi.show');
 });
+=======
+});
+>>>>>>> origin/main

@@ -19,10 +19,11 @@ export default defineConfig({
     server: {
         // Dengarkan di semua antarmuka (IPv4 + IPv6) supaya dev server
         // tetap bisa diakses lewat http://sipandu.test.
-        // Tanpa ini, Vite hanya bind ke [::1]:5173 (IPv6) dan CSS gagal dimuat.
         host: true,
         port: 5173,
         cors: true,
+        origin: 'http://sipandu.test:5173',
+        allowedHosts: ['sipandu.test'],
         watch: {
             ignored: ['**/storage/framework/views/**'],
         },

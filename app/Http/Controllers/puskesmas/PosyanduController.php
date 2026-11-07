@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Puskesmas;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePosyanduRequest;
 use App\Models\Posyandu;
 use Illuminate\Http\JsonResponse;

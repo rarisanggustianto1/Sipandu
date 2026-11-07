@@ -78,7 +78,9 @@ Route::prefix('puskesmas')
 
 // ROUTE MODUL PESERTA / KELUARGA (Punya Ketrin)
 Route::prefix('peserta')->name('peserta.')->group(function () {
-    Route::get('/', [PesertaDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/', PesertaDashboardController::class)->name('dashboard');
     Route::resource('keluarga', KeluargaController::class);
     Route::resource('data', PesertaController::class);
+    Route::get('edukasi', [App\Http\Controllers\Peserta\EdukasiController::class, 'index'])->name('edukasi.index');
+    Route::get('edukasi/{id}', [App\Http\Controllers\Peserta\EdukasiController::class, 'show'])->name('edukasi.show');
 });

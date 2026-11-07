@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Puskesmas;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 

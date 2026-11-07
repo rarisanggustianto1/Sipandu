@@ -1,15 +1,21 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\PengaduanController;
-use App\Http\Controllers\PosyanduController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\PuskesmasDashboardController;
+use App\Http\Controllers\Puskesmas\DashboardController;
+use App\Http\Controllers\Puskesmas\KaderController;
+use App\Http\Controllers\Puskesmas\PengaduanController;
+use App\Http\Controllers\Puskesmas\PosyanduController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    if (! auth()->check()) {
+        return redirect()->route('login');
+    }
+
+    return auth()->user()->role === 'tenaga_kesehatan'
+        ? redirect()->route('puskesmas.dashboard')
+        : redirect()->route('profile');
 });
 
 Route::get('login', [LoginController::class, 'create'])->name('login')->middleware('guest');
@@ -23,13 +29,19 @@ Route::prefix('puskesmas')
     ->middleware(['auth', 'puskesmas'])
     ->name('puskesmas.')
     ->group(function () {
-        Route::get('dashboard', [PuskesmasDashboardController::class, 'index'])->name('dashboard');
+        Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-        Route::apiResource('posyandu', PosyanduController::class);
+        // Posyandu
+        Route::get('posyandu', [PosyanduController::class, 'index'])->name('posyandu.index');
+        Route::get('posyandu/create', [PosyanduController::class, 'create'])->name('posyandu.create');
+        Route::post('posyandu', [PosyanduController::class, 'store'])->name('posyandu.store');
 
-        Route::apiResource('pengaduan', PengaduanController::class)
-            ->only(['index', 'show', 'update']);
+        // Pengaduan
+        Route::get('pengaduan', [PengaduanController::class, 'index'])->name('pengaduan.index');
+        Route::get('pengaduan/{pengaduan}', [PengaduanController::class, 'show'])->name('pengaduan.show');
+        Route::put('pengaduan/{pengaduan}', [PengaduanController::class, 'update'])->name('pengaduan.update');
 
-        Route::get('kader', [RegisterController::class, 'create'])->name('kader.create');
-        Route::post('kader', [RegisterController::class, 'store'])->name('kader.store');
+        // Kader
+        Route::get('kader/create', [KaderController::class, 'create'])->name('kader.create');
+        Route::post('kader', [KaderController::class, 'store'])->name('kader.store');
     });

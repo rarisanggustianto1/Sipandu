@@ -4,7 +4,14 @@
 
 @section('content')
 <div class="mx-auto max-w-md rounded-lg bg-white p-6 shadow">
-    <h1 class="mb-4 text-xl font-bold">Profil Saya</h1>
+    <div class="mb-4 flex items-center justify-between">
+        <h1 class="text-xl font-bold">Profil Saya</h1>
+        <a href="{{ route('puskesmas.dashboard') }}"
+           class="rounded-md bg-teal-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-teal-600"
+           >
+            Ke Dashboard
+        </a>
+    </div>
 
     <dl class="mb-6 space-y-2 text-sm">
         <div>

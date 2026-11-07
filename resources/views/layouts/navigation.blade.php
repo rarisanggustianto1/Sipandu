@@ -31,21 +31,19 @@
             </button>
         </div>
 
-<<<<<<< HEAD
         <!-- Section Title -->
         <div class="px-5 pt-5 pb-2">
             <p class="text-[11px] font-bold tracking-wider text-gray-400 uppercase mb-3 px-3">
                 NAVIGASI UTAMA
             </p>
         </div>
-=======
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                            <<div>{{ Auth::user()?->name ?? 'Guest' }}</div>
                             <div>{{ Auth::user()?->name ?? 'Pengguna' }}</div>
->>>>>>> origin/main
 
         <!-- Navigation Menu Links (4 Menu Utama: Beranda, Anggota Keluarga, Rekam Medis, Edukasi) -->
         <nav class="flex-1 px-4 space-y-1.5">
@@ -147,9 +145,7 @@
             </form>
         </div>
     </div>
-<<<<<<< HEAD
 </aside>
-=======
 
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
@@ -190,4 +186,3 @@
         </div>
     </div>
 </nav>
->>>>>>> origin/main

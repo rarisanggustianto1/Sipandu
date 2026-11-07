@@ -39,10 +39,11 @@ Route::get('/', function () {
 
 // Redirect Otomatis ke Halaman Utama Kader
 Route::get('/dashboard', function () {
-    return redirect()->route('kader.pemeriksaan.index');
+    return redirect()->route('kader.dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile'); // Tambahkan ini
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -50,11 +51,31 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
-// ROUTE MODUL KADER POSYANDU (Punya Kamu)
-Route::prefix('kader')->name('kader.')->group(function () {
-    Route::resource('pemeriksaan', PemeriksaanController::class);
-    Route::resource('jadwal', JadwalKegiatanController::class);
-    Route::resource('imunisasi', ImunisasiController::class);
+Route::prefix('kader')->name('kader.')->middleware('auth')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('kader.dashboard');
+    })->name('dashboard');
+
+    Route::get('/peserta', function () {
+        return view('kader.peserta.index');
+    })->name('peserta.index');
+
+    Route::get('/pemeriksaan', function () {
+        return view('kader.pemeriksaan.index');
+    })->name('pemeriksaan.index');
+
+    Route::get('/pemeriksaan/create', function () {
+        return view('kader.pemeriksaan.create');
+    })->name('pemeriksaan.create');
+
+    Route::get('/monitoring', function () {
+        return view('kader.monitoring.index');
+    })->name('monitoring.index');
+
+    // Route Detail Monitoring Per Kategori
+    Route::get('/monitoring/{kategori}', function ($kategori) {
+        return view('kader.monitoring.show', compact('kategori'));
+    })->name('monitoring.show');
 });
 
 // ROUTE MODUL DINAS KESEHATAN (Punya Dila)

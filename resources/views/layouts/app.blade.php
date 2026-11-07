@@ -55,7 +55,7 @@
                     <span class="rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
                         {{ auth()->user()->role }}
                     </span>
-                    <a href="{{ route('profile') }}" class="hover:underline">{{ auth()->user()->name }}</a>
+                    <a href="{{ route('profile.edit') }}" class="hover:underline">{{ auth()->user()->name }}</a>
                     <form method="POST" action="{{ route('logout') }}" class="inline">
                         @csrf
                         <button type="submit" class="text-red-600 hover:underline">Keluar</button>

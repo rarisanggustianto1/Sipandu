@@ -1,39 +1,84 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>@yield('title', 'SIPANDU') — SIPANDU</title>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
-        <!-- Scripts -->
+    @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
-            @include('layouts.navigation')
+    @endif
 
-            <!-- Page Heading -->
-            @isset($header)
-                <header class="bg-white shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endisset
+    <style>
+        :root {
+            --sipandu-primary: oklch(55% 0.18 250);
+            --sipandu-primary-light: oklch(92% 0.04 250);
+            --sipandu-primary-dark: oklch(40% 0.18 250);
+            --sipandu-success: oklch(62% 0.19 150);
+            --sipandu-success-light: oklch(95% 0.04 150);
+            --sipandu-warning: oklch(78% 0.18 80);
+            --sipandu-warning-light: oklch(96% 0.04 80);
+            --sipandu-danger: oklch(58% 0.24 27);
+            --sipandu-danger-light: oklch(95% 0.04 27);
+            --sipandu-info: oklch(65% 0.15 220);
+            --sipandu-info-light: oklch(95% 0.04 220);
+        }
+    </style>
+</head>
 
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
+<body class="bg-[#FDFDFC] text-[#1b1b18] min-h-screen antialiased">
+
+    @auth
+        <header class="bg-white shadow-sm border-b">
+            <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+                <a href="{{ url('/') }}" class="text-lg font-bold tracking-tight">
+                    SIPANDU
+                </a>
+
+                <nav class="flex items-center gap-4 text-sm">
+                    <span class="rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
+                        {{ auth()->user()->role }}
+                    </span>
+
+                    <span>{{ auth()->user()->name }}</span>
+
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="text-red-600 hover:underline">
+                            Keluar
+                        </button>
+                    </form>
+                </nav>
+            </div>
+        </header>
+    @endauth
+
+    {{-- Flash Messages --}}
+    @if (session('success'))
+        <div class="max-w-6xl mx-auto px-4 mt-4">
+            <div class="rounded-md p-4 text-sm bg-green-100 text-green-800">
+                {{ session('success') }}
+            </div>
         </div>
-    </body>
-<html lang="id">
+    @endif
+
+    @if (session('error'))
+        <div class="max-w-6xl mx-auto px-4 mt-4">
+            <div class="rounded-md p-4 text-sm bg-red-100 text-red-800">
+                {{ session('error') }}
+            </div>
+        </div>
+    @endif
+
+    {{-- Page Content --}}
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        @yield('content')
+    </main>
+
+</body>
+</html>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">

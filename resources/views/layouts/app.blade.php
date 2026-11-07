@@ -69,6 +69,7 @@
                 <main class="min-w-0 flex-1 px-4 py-6 lg:px-8">
                     @include('layouts.partials.flash')
                     @yield('content')
+                    {{ $slot ?? '' }}
                 </main>
             </div>
         </div>
@@ -92,9 +93,18 @@
             </header>
         @endauth
 
+        @isset($header)
+            <header class="bg-white shadow-sm">
+                <div class="mx-auto max-w-5xl px-4 py-4">
+                    {{ $header }}
+                </div>
+            </header>
+        @endisset
+
         <main class="mx-auto max-w-5xl px-4 py-6">
             @include('layouts.partials.flash')
             @yield('content')
+            {{ $slot ?? '' }}
         </main>
     @endif
 </body>

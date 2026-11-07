@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -65,9 +66,15 @@
         }
 
         .error {
-            color: #444;
+            color: #b91c1c;
             font-size: 13px;
             margin-top: 5px;
+        }
+
+        .info {
+            color: #666;
+            font-size: 13px;
+            margin-top: 6px;
         }
 
         .actions {
@@ -96,12 +103,12 @@
 
     <div class="container">
         <h1>Tambah Puskesmas</h1>
-        <p>Masukkan informasi Puskesmas yang akan didaftarkan.</p>
+        <p>Masukkan informasi Puskesmas sekaligus buat akun login.</p>
 
         <div class="form-card">
 
             @if ($errors->any())
-                <p>Periksa kembali data yang kamu masukkan.</p>
+                <p class="error">Periksa kembali data yang kamu masukkan.</p>
             @endif
 
             <form action="{{ route('dinas.puskesmas.store') }}"
@@ -110,12 +117,12 @@
                 @csrf
 
                 <div class="form-group">
-                    <label for="dinas_kesehatan_id">
-                        Dinas Kesehatan
-                    </label>
+                    <label for="dinas_kesehatan_id">Dinas Kesehatan</label>
 
                     <select name="dinas_kesehatan_id"
-                            id="dinas_kesehatan_id" required>
+                            id="dinas_kesehatan_id"
+                            required>
+
                         <option value="">Pilih Dinas Kesehatan</option>
 
                         @foreach ($dinas as $item)
@@ -124,6 +131,7 @@
                                 {{ $item->nama_dinas }}
                             </option>
                         @endforeach
+
                     </select>
 
                     @error('dinas_kesehatan_id')
@@ -131,13 +139,16 @@
                     @enderror
 
                     @if ($dinas->isEmpty())
-                        <p>Belum ada data Dinas Kesehatan.
-                           Tambahkan data Dinas Kesehatan terlebih dahulu.</p>
+                        <p class="info">
+                            Belum ada data Dinas Kesehatan.
+                            Tambahkan data Dinas Kesehatan terlebih dahulu.
+                        </p>
                     @endif
                 </div>
 
                 <div class="form-group">
                     <label for="nama_puskesmas">Nama Puskesmas</label>
+
                     <input type="text"
                            id="nama_puskesmas"
                            name="nama_puskesmas"
@@ -151,6 +162,7 @@
 
                 <div class="form-group">
                     <label for="kecamatan">Kecamatan</label>
+
                     <input type="text"
                            id="kecamatan"
                            name="kecamatan"
@@ -164,6 +176,7 @@
 
                 <div class="form-group">
                     <label for="alamat">Alamat</label>
+
                     <textarea id="alamat"
                               name="alamat"
                               required>{{ old('alamat') }}</textarea>
@@ -175,24 +188,65 @@
 
                 <div class="form-group">
                     <label for="telepon">Nomor Telepon</label>
+
                     <input type="text"
                            id="telepon"
                            name="telepon"
                            value="{{ old('telepon') }}">
+
                     @error('telepon')
                         <div class="error">{{ $message }}</div>
                     @enderror
                 </div>
 
                 <div class="form-group">
-                    <label for="email">Email</label>
+                    <label for="email">Email Login Puskesmas</label>
+
                     <input type="email"
                            id="email"
                            name="email"
-                           value="{{ old('email') }}">
+                           value="{{ old('email') }}"
+                           required>
+
+                    <div class="info">
+                        Email ini digunakan untuk login ke akun Puskesmas.
+                    </div>
+
                     @error('email')
                         <div class="error">{{ $message }}</div>
                     @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password Akun Puskesmas</label>
+
+                    <input type="password"
+                           id="password"
+                           name="password"
+                           minlength="8"
+                           autocomplete="new-password"
+                           required>
+
+                    <div class="info">
+                        Gunakan password minimal 8 karakter.
+                    </div>
+
+                    @error('password')
+                        <div class="error">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label for="password_confirmation">
+                        Konfirmasi Password
+                    </label>
+
+                    <input type="password"
+                           id="password_confirmation"
+                           name="password_confirmation"
+                           minlength="8"
+                           autocomplete="new-password"
+                           required>
                 </div>
 
                 <div class="actions">

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Dinas;
 
 use App\Http\Controllers\Controller;
-use App\Models\Edukasi;
+use App\Models\Dinas\Edukasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;

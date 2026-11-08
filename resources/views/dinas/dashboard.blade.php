@@ -153,23 +153,7 @@
 
 <body>
 
-    <header class="navbar">
-        <h2>SIPANDU | Dinas Kesehatan</h2>
-
-        <nav class="nav-links">
-            <a href="{{ route('dinas.dashboard') }}">
-                Dashboard
-            </a>
-
-            <a href="{{ route('dinas.puskesmas.index') }}">
-                Puskesmas
-            </a>
-
-            <a href="{{ route('dinas.edukasi.index') }}">
-                Edukasi
-            </a>
-        </nav>
-    </header>
+    @include('dinas.partials.header')
 
     <main class="container">
 

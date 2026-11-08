@@ -12,7 +12,8 @@ class UpdateProfileRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'email' => [
-                'required', 'string', 'lowercase', 'email', 'max:255',
+                Rule::requiredIf($this->user()->role !== 'keluarga'),
+                'nullable', 'string', 'lowercase', 'email', 'max:255',
                 Rule::unique('users', 'email')->ignore($this->user()->id),
             ],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],

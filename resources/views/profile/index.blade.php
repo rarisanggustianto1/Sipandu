@@ -6,7 +6,7 @@
 <div class="mx-auto max-w-md rounded-lg bg-white p-6 shadow">
     <div class="mb-4 flex items-center justify-between">
         <h1 class="text-xl font-bold">Profil Saya</h1>
-        <a href="{{ route('puskesmas.dashboard') }}"
+        <a href="{{ route('home') }}"
            class="rounded-md bg-teal-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-teal-600"
            >
             Ke Dashboard
@@ -20,7 +20,7 @@
         </div>
         <div>
             <dt class="font-medium">Email</dt>
-            <dd>{{ $user->email }}</dd>
+            <dd>{{ $user->email ?: $user->keluarga?->no_kk }}</dd>
         </div>
         <div>
             <dt class="font-medium">Role</dt>
@@ -53,8 +53,8 @@
         </div>
 
         <div>
-            <label for="email" class="block text-sm font-medium">Email</label>
-            <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" required
+            <label for="email" class="block text-sm font-medium">Email{{ $user->role === 'keluarga' ? ' (opsional)' : '' }}</label>
+            <input type="email" name="email" id="email" value="{{ old('email', $user->email) }}" @required($user->role !== 'keluarga')
                    class="mt-1 w-full rounded-md border-gray-300 shadow-sm">
         </div>
 

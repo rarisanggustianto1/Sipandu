@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Peserta;
 
 use App\Http\Controllers\Controller;
-use App\Models\Keluarga;
-use App\Models\Peserta;
+use App\Models\Peserta\Peserta;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -12,103 +11,72 @@ use Illuminate\View\View;
 
 class PesertaController extends Controller
 {
-    
     public function index(Request $request): View
     {
-        $query = Peserta::with('keluarga');
-
-        if ($search = $request->input('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('nik', 'like', "%{$search}%")
-                  ->orWhere('nama', 'like', "%{$search}%");
-            });
-        }
-
-        if ($kategori = $request->input('kategori')) {
-            $query->where('kategori', $kategori);
-        }
-
-        if ($jenisKelamin = $request->input('jenis_kelamin')) {
-            $query->where('jenis_kelamin', $jenisKelamin);
-        }
-
-        if ($keluargaId = $request->input('keluarga_id')) {
-            $query->where('keluarga_id', $keluargaId);
-        }
-
-        $peserta = $query->latest()->paginate(15)->withQueryString();
+        $peserta = Peserta::query()
+            ->forKeluarga($request->user()->keluarga_id)
+            ->with([
+                'pemeriksaanTerbaru.balita',
+                'pemeriksaanTerbaru.bumil',
+                'pemeriksaanTerbaru.lansia',
+            ])
+            ->latest()
+            ->paginate(15);
 
         return view('peserta.data.index', compact('peserta'));
     }
 
-    public function create(Request $request): View
+    public function create(): View
     {
-        $keluargaList = Keluarga::orderBy('nama_kepala_keluarga')->get();
+        abort_if(auth()->user()->keluarga_id === null, 403, 'Akun keluarga belum terhubung ke data keluarga.');
 
-        $selectedKeluargaId = $request->input('keluarga_id');
-
-        return view('peserta.data.create', compact('keluargaList', 'selectedKeluargaId'));
+        return view('peserta.data.create');
     }
 
     public function store(Request $request): RedirectResponse
     {
+        abort_if($request->user()->keluarga_id === null, 403, 'Akun keluarga belum terhubung ke data keluarga.');
+
         $validated = $request->validate([
-            'keluarga_id'   => ['required', 'exists:keluarga,id'],
-            'nik'           => ['required', 'string', 'size:16', 'unique:peserta,nik'],
-            'nama'          => ['required', 'string', 'max:255'],
+            'nik' => ['required', 'string', 'size:16', 'unique:peserta,nik'],
+            'nama' => ['required', 'string', 'max:255'],
             'jenis_kelamin' => ['required', Rule::in(['L', 'P'])],
             'tanggal_lahir' => ['required', 'date', 'before_or_equal:today'],
-            'kategori'      => ['required', Rule::in(['balita', 'ibu_hamil', 'lansia'])],
+            'kategori' => ['required', Rule::in(['balita', 'ibu_hamil', 'lansia'])],
         ]);
 
-        Peserta::create($validated);
-
-        return redirect()
-            ->route('peserta.data.index')
-            ->with('success', 'Data peserta berhasil ditambahkan.');
-    }
-
-    public function show(Peserta $datum): View
-    {
-        $datum->load(['keluarga.posyandu']);
-
-        return view('peserta.data.show', ['peserta' => $datum]);
-    }
-
-    public function edit(Peserta $datum): View
-    {
-        $keluargaList = Keluarga::orderBy('nama_kepala_keluarga')->get();
-
-        return view('peserta.data.edit', [
-            'peserta'      => $datum,
-            'keluargaList' => $keluargaList,
-        ]);
-    }
-
-    public function update(Request $request, Peserta $datum): RedirectResponse
-    {
-        $validated = $request->validate([
-            'keluarga_id'   => ['required', 'exists:keluarga,id'],
-            'nik'           => ['required', 'string', 'size:16', "unique:peserta,nik,{$datum->id}"],
-            'nama'          => ['required', 'string', 'max:255'],
-            'jenis_kelamin' => ['required', Rule::in(['L', 'P'])],
-            'tanggal_lahir' => ['required', 'date', 'before_or_equal:today'],
-            'kategori'      => ['required', Rule::in(['balita', 'ibu_hamil', 'lansia'])],
+        $peserta = Peserta::create([
+            ...$validated,
+            'keluarga_id' => $request->user()->keluarga_id,
         ]);
 
-        $datum->update($validated);
-
         return redirect()
-            ->route('peserta.data.show', $datum)
-            ->with('success', 'Data peserta berhasil diperbarui.');
+            ->route('peserta.data.show', $peserta)
+            ->with('success', 'Anggota keluarga berhasil ditambahkan.');
     }
 
-    public function destroy(Peserta $datum): RedirectResponse
+    public function show(Request $request, Peserta $data): View
     {
-        $datum->delete();
+        $peserta = $this->authenticatedParticipant($request, $data)
+            ->load([
+                'keluarga.posyandu',
+                'pemeriksaan' => fn ($query) => $query
+                    ->with(['balita', 'bumil', 'lansia'])
+                    ->latest('tanggal_pemeriksaan')
+                    ->latest('id'),
+                'imunisasi' => fn ($query) => $query
+                    ->orderByRaw('tanggal_pemberian is null')
+                    ->latest('tanggal_pemberian')
+                    ->latest('id'),
+            ]);
 
-        return redirect()
-            ->route('peserta.data.index')
-            ->with('success', 'Data peserta berhasil dihapus.');
+        return view('peserta.data.show', compact('peserta'));
+    }
+
+    private function authenticatedParticipant(Request $request, Peserta $participant): Peserta
+    {
+        return Peserta::query()
+            ->forKeluarga($request->user()->keluarga_id)
+            ->findOrFail($participant->id);
     }
 }

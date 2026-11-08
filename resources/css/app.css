@@ -10,6 +10,35 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
+form :is(
+    input:not([type='checkbox'], [type='radio'], [type='hidden'], [type='submit'], [type='reset'], [type='button'], [type='image']),
+    select,
+    textarea
+) {
+    border: 1px solid #cbd5e1;
+    border-radius: 0.75rem;
+    background-color: #f8fafc;
+    color: #1e293b;
+}
+
+form :is(
+    input:not([type='checkbox'], [type='radio'], [type='hidden'], [type='submit'], [type='reset'], [type='button'], [type='image']),
+    select,
+    textarea
+):focus {
+    border-color: #0f766e;
+    outline: 3px solid rgb(15 118 110 / 16%);
+    outline-offset: 1px;
+}
+
+form :is(
+    input:not([type='checkbox'], [type='radio'], [type='hidden'], [type='submit'], [type='reset'], [type='button'], [type='image']),
+    select,
+    textarea
+)::placeholder {
+    color: #94a3b8;
+}
+
 /* Sembunyikan penanda segitiga bawaan browser pada <summary> (folder sidebar) */
 summary::-webkit-details-marker {
     display: none;
@@ -17,4 +46,8 @@ summary::-webkit-details-marker {
 
 summary {
     list-style: none;
+}
+
+[x-cloak] {
+    display: none !important;
 }

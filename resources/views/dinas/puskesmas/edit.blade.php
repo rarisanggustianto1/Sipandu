@@ -21,6 +21,11 @@
             background: #f5f5f5;
             border-bottom: 1px solid #ddd;
             padding: 24px 4%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
         }
 
         header h1 {
@@ -106,9 +111,7 @@
 </head>
 <body>
 
-<header>
-    <h1>SIPANDU | Dinas Kesehatan</h1>
-</header>
+@include('dinas.partials.header')
 
 <main>
     <h2>Edit Puskesmas</h2>
@@ -122,24 +125,9 @@
             @method('PUT')
 
             <div class="form-group">
-                <label for="dinas_kesehatan_id">Dinas Kesehatan</label>
-
-                <select name="dinas_kesehatan_id"
-                        id="dinas_kesehatan_id"
-                        required>
-                    <option value="">Pilih Dinas Kesehatan</option>
-
-                    @foreach ($dinas as $item)
-                        <option value="{{ $item->id }}"
-                            @selected(old('dinas_kesehatan_id', $puskesmas->dinas_kesehatan_id) == $item->id)>
-                            {{ $item->nama_dinas }}
-                        </option>
-                    @endforeach
-                </select>
-
-                @error('dinas_kesehatan_id')
-                    <div class="error">{{ $message }}</div>
-                @enderror
+                <label>Dinas pengelola</label>
+                <p>{{ $dinas?->nama_dinas ?? 'Belum terhubung' }}</p>
+                <p class="subtitle">Relasi Dinas tidak dapat diubah dari formulir Puskesmas.</p>
             </div>
 
             <div class="form-group">

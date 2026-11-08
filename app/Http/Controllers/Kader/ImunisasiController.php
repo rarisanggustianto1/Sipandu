@@ -3,88 +3,132 @@
 namespace App\Http\Controllers\Kader;
 
 use App\Http\Controllers\Controller;
-use App\Models\Imunisasi;
-use App\Models\Pemeriksaan;
+use App\Models\Kader\Imunisasi;
+use App\Models\Peserta\Peserta;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class ImunisasiController extends Controller
 {
-    public function index()
+    public function index(Request $request): View
     {
-        $imunisasi = Imunisasi::with(['pemeriksaan.peserta'])->latest()->paginate(10);
+        $imunisasi = Imunisasi::query()
+            ->forPosyandu($request->user()->posyandu_id)
+            ->with('peserta')
+            ->latest()
+            ->paginate(10);
+
         return view('kader.imunisasi.index', compact('imunisasi'));
     }
 
-    public function create()
+    public function create(Request $request): View
     {
-        $pemeriksaan = Pemeriksaan::with('peserta')->latest()->get();
-        return view('kader.imunisasi.create', compact('pemeriksaan'));
+        $peserta = Peserta::query()
+            ->forPosyandu($request->user()->posyandu_id)
+            ->orderBy('nama')
+            ->get();
+
+        return view('kader.imunisasi.create', compact('peserta'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'pemeriksaan_id' => 'required|exists:pemeriksaan,id',
-            'jenis_vaksin'   => 'nullable|string|max:100',
-            'vitamin'        => 'nullable|string|max:100',
-            'obat_cacing'    => 'boolean',
-            'keterangan'     => 'nullable|string',
+        $validated = $request->validate([
+            'peserta_id' => ['required', 'integer', 'exists:peserta,id'],
+            'jenis_imunisasi' => ['nullable', 'string', 'max:100'],
+            'jenis_vaksin' => ['nullable', 'string', 'max:100'],
+            'tanggal_jadwal' => ['nullable', 'date'],
+            'tanggal_pemberian' => ['nullable', 'date'],
+            'status' => ['nullable', 'in:terjadwal,selesai,terlewat'],
+            'catatan' => ['nullable', 'string'],
         ]);
 
-        Imunisasi::create([
-            'pemeriksaan_id' => $request->pemeriksaan_id,
-            'jenis_vaksin'   => $request->jenis_vaksin,
-            'vitamin'        => $request->vitamin,
-            'obat_cacing'    => $request->boolean('obat_cacing'),
-            'keterangan'     => $request->keterangan,
-        ]);
+        Peserta::query()
+            ->forPosyandu($request->user()->posyandu_id)
+            ->findOrFail($validated['peserta_id']);
 
-        return redirect()->route('kader.imunisasi.index')
-            ->with('success', 'Data imunisasi & vitamin berhasil ditambahkan.');
+        if (empty($validated['jenis_imunisasi']) && ! empty($validated['jenis_vaksin'])) {
+            $validated['jenis_imunisasi'] = $validated['jenis_vaksin'];
+        }
+
+        if (empty($validated['jenis_imunisasi'])) {
+            $validated['jenis_imunisasi'] = 'Imunisasi Rutin';
+        }
+
+        if (empty($validated['status'])) {
+            $validated['status'] = ! empty($validated['tanggal_pemberian']) ? 'selesai' : 'terjadwal';
+        }
+
+        Imunisasi::create($validated);
+
+        return redirect()
+            ->route('kader.imunisasi.index')
+            ->with('success', 'Data imunisasi & vitamin berhasil disimpan.');
     }
 
-    public function show(string $id)
+    public function show(Request $request, string $id): View
     {
-        $imunisasi = Imunisasi::with(['pemeriksaan.peserta', 'pemeriksaan.jadwalKegiatan'])->findOrFail($id);
+        $imunisasi = Imunisasi::query()
+            ->forPosyandu($request->user()->posyandu_id)
+            ->with('peserta')
+            ->findOrFail($id);
+
         return view('kader.imunisasi.show', compact('imunisasi'));
     }
 
-    public function edit(string $id)
+    public function edit(Request $request, string $id): View
     {
-        $imunisasi = Imunisasi::findOrFail($id);
-        $pemeriksaan = Pemeriksaan::with('peserta')->get();
-        return view('kader.imunisasi.edit', compact('imunisasi', 'pemeriksaan'));
+        $imunisasi = Imunisasi::query()
+            ->forPosyandu($request->user()->posyandu_id)
+            ->findOrFail($id);
+        $peserta = Peserta::query()
+            ->forPosyandu($request->user()->posyandu_id)
+            ->orderBy('nama')
+            ->get();
+
+        return view('kader.imunisasi.edit', compact('imunisasi', 'peserta'));
     }
 
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $id): RedirectResponse
     {
-        $request->validate([
-            'pemeriksaan_id' => 'required|exists:pemeriksaan,id',
-            'jenis_vaksin'   => 'nullable|string|max:100',
-            'vitamin'        => 'nullable|string|max:100',
-            'obat_cacing'    => 'boolean',
-            'keterangan'     => 'nullable|string',
+        $validated = $request->validate([
+            'peserta_id' => ['required', 'integer', 'exists:peserta,id'],
+            'jenis_imunisasi' => ['nullable', 'string', 'max:100'],
+            'jenis_vaksin' => ['nullable', 'string', 'max:100'],
+            'tanggal_jadwal' => ['nullable', 'date'],
+            'tanggal_pemberian' => ['nullable', 'date'],
+            'status' => ['nullable', 'in:terjadwal,selesai,terlewat'],
+            'catatan' => ['nullable', 'string'],
         ]);
 
-        $imunisasi = Imunisasi::findOrFail($id);
-        $imunisasi->update([
-            'pemeriksaan_id' => $request->pemeriksaan_id,
-            'jenis_vaksin'   => $request->jenis_vaksin,
-            'vitamin'        => $request->vitamin,
-            'obat_cacing'    => $request->boolean('obat_cacing'),
-            'keterangan'     => $request->keterangan,
-        ]);
+        Peserta::query()
+            ->forPosyandu($request->user()->posyandu_id)
+            ->findOrFail($validated['peserta_id']);
 
-        return redirect()->route('kader.imunisasi.index')
+        if (empty($validated['jenis_imunisasi']) && ! empty($validated['jenis_vaksin'])) {
+            $validated['jenis_imunisasi'] = $validated['jenis_vaksin'];
+        }
+
+        $imunisasi = Imunisasi::query()
+            ->forPosyandu($request->user()->posyandu_id)
+            ->findOrFail($id);
+        $imunisasi->update($validated);
+
+        return redirect()
+            ->route('kader.imunisasi.index')
             ->with('success', 'Data imunisasi berhasil diperbarui.');
     }
 
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id): RedirectResponse
     {
-        $imunisasi = Imunisasi::findOrFail($id);
+        $imunisasi = Imunisasi::query()
+            ->forPosyandu($request->user()->posyandu_id)
+            ->findOrFail($id);
         $imunisasi->delete();
 
-        return redirect()->route('kader.imunisasi.index')
+        return redirect()
+            ->route('kader.imunisasi.index')
             ->with('success', 'Data imunisasi berhasil dihapus.');
     }
 }

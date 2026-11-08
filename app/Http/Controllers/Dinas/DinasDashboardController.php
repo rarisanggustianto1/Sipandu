@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Dinas;
 
 use App\Http\Controllers\Controller;
-use App\Models\Puskesmas;
+use App\Models\Puskesmas\Puskesmas;
 use Illuminate\Support\Facades\DB;
 
 class DinasDashboardController extends Controller

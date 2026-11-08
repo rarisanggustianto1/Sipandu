@@ -6,6 +6,8 @@ namespace App\Models;
 use App\Models\Puskesmas\Puskesmas;
 use App\Models\Puskesmas\Posyandu;
 use App\Models\Puskesmas\Pengaduan;
+use App\Models\Dinas\DinasKesehatan;
+use App\Models\Peserta\Keluarga;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -33,6 +35,11 @@ class User extends Authenticatable
         ];
     }
 
+    public function dinasKesehatan()
+    {
+        return $this->belongsTo(DinasKesehatan::class, 'dinas_kesehatan_id');
+    }
+
     public function puskesmas()
     {
         return $this->belongsTo(Puskesmas::class);
@@ -41,6 +48,11 @@ class User extends Authenticatable
     public function posyandu()
     {
         return $this->belongsTo(Posyandu::class);
+    }
+
+    public function keluarga()
+    {
+        return $this->belongsTo(Keluarga::class);
     }
 
     public function pengaduans()

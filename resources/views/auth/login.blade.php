@@ -10,8 +10,8 @@
         @csrf
 
         <div>
-            <label for="email" class="block text-sm font-medium">Email</label>
-            <input type="email" name="email" id="email" value="{{ old('email') }}" required autofocus
+            <label for="login" class="block text-sm font-medium">Email atau Nomor KK</label>
+            <input type="text" name="login" id="login" value="{{ old('login') }}" required autofocus
                    class="mt-1 w-full rounded-md border-gray-300 shadow-sm">
         </div>
 
@@ -31,5 +31,11 @@
             Masuk
         </button>
     </form>
+
+    <p class="mt-4 text-sm text-gray-600">
+        Belum memiliki akun keluarga?
+        <a href="{{ route('register') }}" class="font-semibold text-blue-600 hover:text-blue-700">Daftar di sini</a>.
+        Jika Kader sudah mendaftarkan keluarga Anda, masuk menggunakan No. KK dan password awal dari Kader.
+    </p>
 </div>
 @endsection

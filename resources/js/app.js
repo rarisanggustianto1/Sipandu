@@ -4,7 +4,7 @@ window.Alpine = Alpine;
 Alpine.start();
 
 /**
- * Sidebar Puskesmas.
+ * Sidebar navigation for authenticated SIPANDU roles.
  *
  * 1. Buka/tutup sidebar untuk layar kecil (mobile).
  * 2. Ingat folder mana yang terbuka/b tertutup (localStorage),

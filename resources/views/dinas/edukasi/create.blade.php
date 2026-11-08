@@ -19,6 +19,11 @@
             padding: 24px 4%;
             background: #f5f5f5;
             border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
         }
 
         header h1 { margin: 0; font-size: 26px; }
@@ -195,9 +200,7 @@
 
 <body>
 
-<header>
-    <h1>SIPANDU | Dinas Kesehatan</h1>
-</header>
+@include('dinas.partials.header')
 
 <main>
     <h2>Tambah Edukasi</h2>
@@ -410,4 +413,3 @@
 
 </body>
 </html>
-

@@ -23,6 +23,11 @@
         color: #222222;
         padding: 20px 40px;
         border-bottom: 1px solid #dddddd;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
     }
 
     .navbar h2 {
@@ -104,9 +109,7 @@
 </head>
 <body>
 
-    <div class="navbar">
-        <h2>SIPANDU | Dinas Kesehatan</h2>
-    </div>
+    @include('dinas.partials.header')
 
     <div class="container">
 

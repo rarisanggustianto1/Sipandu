@@ -1,175 +1,118 @@
 <x-app-layout>
-    <div x-data="{ range: 'bulan' }" class="py-8 bg-[#f4f7f6] min-h-screen">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+    @php
+        $persentaseBaik = $ringkasan['jumlah_peserta'] > 0
+            ? round($ringkasan['jumlah_baik'] / $ringkasan['jumlah_peserta'] * 100)
+            : 0;
+        $persentasePemantauan = $ringkasan['jumlah_peserta'] > 0
+            ? round($ringkasan['jumlah_pemantauan'] / $ringkasan['jumlah_peserta'] * 100)
+            : 0;
+        $persentasePrioritas = max(0, 100 - $persentaseBaik - $persentasePemantauan);
+        $urutanKategori = ['ibu_hamil' => 1, 'balita' => 2, 'lansia' => 3];
+    @endphp
 
-            <!-- HEADER SECTION & FILTER RENTANG WAKTU -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+        <header class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+            <div>
+                <h1 class="text-2xl font-black tracking-tight text-slate-900">Monitoring &amp; Pemantauan</h1>
+                <p class="mt-1 text-sm text-slate-500">Pantau kondisi peserta dan tentukan prioritas tindak lanjut Posyandu Anda.</p>
+            </div>
+
+            <nav aria-label="Pilih periode monitoring" class="inline-flex w-fit rounded-full bg-slate-200/70 p-1">
+                @foreach (['minggu_ini' => 'Minggu Ini', 'bulan_ini' => 'Bulan Ini', '3_bulan' => '3 Bulan'] as $key => $label)
+                    <a
+                        href="{{ route('kader.monitoring.index', ['periode' => $key]) }}"
+                        @if ($periode === $key) aria-current="page" @endif
+                        class="rounded-full px-4 py-2 text-xs font-semibold transition {{ $periode === $key ? 'bg-teal-700 text-white shadow-sm' : 'text-slate-600 hover:bg-white hover:text-slate-900' }}"
+                    >{{ $label }}</a>
+                @endforeach
+            </nav>
+        </header>
+
+        <section aria-labelledby="monitoring-summary-title" class="rounded-3xl border border-slate-100 bg-white p-5 shadow-sm sm:p-7">
+            <div class="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                    <h1 class="text-2xl font-black text-slate-800 tracking-tight">Monitoring & Pemantauan</h1>
-                    <p class="text-xs text-slate-500 font-medium mt-0.5">Pantau kondisi peserta dan tentukan prioritas tindak lanjut wilayah Mawar 01</p>
+                    <h2 id="monitoring-summary-title" class="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">Total Peserta Dipantau</h2>
+                    <div class="mt-1 flex items-baseline gap-2">
+                        <p class="text-3xl font-black tracking-tight text-slate-900">{{ $ringkasan['jumlah_peserta'] }}</p>
+                        <span class="text-sm text-slate-400">Jiwa</span>
+                    </div>
+                    <p class="mt-1 text-xs text-slate-500">{{ $ringkasan['jumlah_diperiksa'] }} diperiksa pada periode {{ strtolower($namaPeriode) }}</p>
                 </div>
 
-                <!-- FILTER PILIHAN WAKTU -->
-                <div class="bg-slate-200/60 p-1 rounded-2xl flex items-center text-xs self-start sm:self-auto">
-                    <button @click="range = 'minggu'" :class="range === 'minggu' ? 'bg-teal-700 text-white font-bold shadow-xs' : 'text-slate-600 font-medium hover:text-slate-800'" class="px-3.5 py-1.5 rounded-xl transition-all">
-                        Minggu Ini
-                    </button>
-                    <button @click="range = 'bulan'" :class="range === 'bulan' ? 'bg-teal-700 text-white font-bold shadow-xs' : 'text-slate-600 font-medium hover:text-slate-800'" class="px-3.5 py-1.5 rounded-xl transition-all">
-                        Bulan Ini
-                    </button>
-                    <button @click="range = '3bulan'" :class="range === '3bulan' ? 'bg-teal-700 text-white font-bold shadow-xs' : 'text-slate-600 font-medium hover:text-slate-800'" class="px-3.5 py-1.5 rounded-xl transition-all">
-                        3 Bulan
-                    </button>
-                </div>
+                <span class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
+                    {{ $ringkasan['persentase_diperiksa'] }}% telah diperiksa
+                </span>
             </div>
 
-            <!-- 1. RINGKASAN POSYANDU CARD -->
-            <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-5">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Peserta Dipantau</p>
-                        <h2 class="text-3xl font-black text-slate-800 mt-1">128 <span class="text-xs font-normal text-slate-400">Jiwa</span></h2>
-                    </div>
-                    <span class="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full text-xs font-bold flex items-center space-x-1">
-                        <span>↗ +12%</span>
-                        <span class="text-[10px] text-emerald-600 font-normal">kehadiran</span>
-                    </span>
-                </div>
-
-                <!-- Multi-color Progress Bar -->
-                <div class="space-y-1.5">
-                    <div class="w-full h-3.5 bg-slate-100 rounded-full overflow-hidden flex">
-                        <div class="bg-teal-600 h-full" style="width: 86%"></div>
-                        <div class="bg-amber-500 h-full" style="width: 10%"></div>
-                        <div class="bg-rose-500 h-full" style="width: 4%"></div>
-                    </div>
-                </div>
-
-                <!-- Breakdown Status Stats -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-teal-600"></span>
-                            <span class="text-xs font-medium text-slate-600">Kondisi Baik</span>
-                        </div>
-                        <span class="text-sm font-extrabold text-slate-800">86%</span>
-                    </div>
-
-                    <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                            <span class="text-xs font-medium text-slate-600">Perlu Pemantauan</span>
-                        </div>
-                        <span class="text-sm font-extrabold text-slate-800">10%</span>
-                    </div>
-
-                    <div class="p-3.5 bg-rose-50/50 rounded-2xl border border-rose-100 flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-                            <span class="text-xs font-bold text-rose-700">Prioritas / Intervensi</span>
-                        </div>
-                        <span class="text-sm font-extrabold text-rose-700">4%</span>
-                    </div>
-                </div>
+            <div
+                class="mt-5 flex h-3 overflow-hidden rounded-full bg-slate-100"
+                role="img"
+                aria-label="Sebaran status: {{ $persentaseBaik }} persen kondisi baik, {{ $persentasePemantauan }} persen perlu pemantauan, {{ $persentasePrioritas }} persen prioritas"
+            >
+                <span class="bg-teal-600 transition-all" style="width: {{ $persentaseBaik }}%"></span>
+                <span class="bg-amber-400 transition-all" style="width: {{ $persentasePemantauan }}%"></span>
+                <span class="bg-rose-500 transition-all" style="width: {{ $persentasePrioritas }}%"></span>
             </div>
 
-            <!-- 2. BREAKDOWN PER KATEGORI MONITORING -->
-            <!-- 2. BREAKDOWN PER KATEGORI MONITORING -->
-            <div class="space-y-3">
-                <h3 class="font-bold text-slate-800 text-sm">Kategori Monitoring (Klik untuk Lihat Detail)</h3>
+            <div class="mt-4 grid gap-2 sm:grid-cols-3">
+                <div class="flex items-center justify-between gap-3 rounded-2xl bg-slate-50 px-4 py-3">
+                    <span class="text-sm font-medium text-slate-600">Kondisi Baik</span>
+                    <span class="text-sm font-extrabold text-slate-900">{{ $persentaseBaik }}%</span>
+                </div>
+                <div class="flex items-center justify-between gap-3 rounded-2xl bg-amber-50/70 px-4 py-3">
+                    <span class="text-sm font-medium text-amber-800">Perlu Pemantauan</span>
+                    <span class="text-sm font-extrabold text-amber-900">{{ $persentasePemantauan }}%</span>
+                </div>
+                <div class="flex items-center justify-between gap-3 rounded-2xl bg-rose-50/70 px-4 py-3">
+                    <span class="text-sm font-medium text-rose-800">Prioritas / Intervensi</span>
+                    <span class="text-sm font-extrabold text-rose-900">{{ $persentasePrioritas }}%</span>
+                </div>
+            </div>
+        </section>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <section class="space-y-3">
+            <div>
+                <h2 class="text-base font-bold text-slate-800">Kategori Monitoring <span class="font-normal text-slate-500">(Pilih untuk melihat detail)</span></h2>
+            </div>
 
-                    <!-- Card Ibu Hamil (Bisa Di-klik) -->
-                    <a href="{{ route('kader.monitoring.show', 'bumil') }}" class="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs space-y-4 hover:border-teal-500 hover:shadow-md transition-all group block">
-                        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 rounded-2xl bg-rose-50 text-rose-700 flex items-center justify-center font-bold text-base">🤰</div>
-                                <div>
-                                    <h4 class="font-extrabold text-slate-800 text-sm group-hover:text-teal-700 transition-colors">Ibu Hamil</h4>
-                                    <p class="text-[11px] text-slate-400">Total 24 Orang</p>
-                                </div>
+            <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                @foreach ($kategori->sortBy(fn (array $item): int => $urutanKategori[$item['key']]) as $item)
+                    @php
+                        $satuan = $item['key'] === 'balita' ? 'Anak' : 'Orang';
+                        $urlDetail = route('kader.monitoring.show', ['kategori' => $item['key'], 'periode' => $periode]);
+                    @endphp
+                    <a href="{{ $urlDetail }}" class="group rounded-3xl border border-slate-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-teal-200 hover:shadow-md">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <h3 class="font-bold text-slate-800">{{ $item['label'] }}</h3>
+                                <p class="mt-1 text-xs text-slate-400">Total {{ $item['jumlah_peserta'] }} {{ $satuan }}</p>
                             </div>
-                            <span class="text-teal-700 text-xs font-bold group-hover:translate-x-1 transition-transform">&rarr;</span>
+                            <span class="text-xs font-semibold text-teal-700 group-hover:underline">Lihat detail</span>
                         </div>
 
-                        <div class="grid grid-cols-3 gap-2 text-center text-xs">
-                            <div class="bg-teal-50/60 p-2.5 rounded-2xl border border-teal-100">
-                                <span class="text-[10px] text-teal-700 font-bold block">Baik</span>
-                                <span class="text-base font-black text-teal-800 mt-0.5 block">18</span>
+                        <div class="my-4 border-t border-slate-100"></div>
+
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="rounded-2xl border border-teal-100 bg-teal-50/60 px-2 py-3 text-center">
+                                <p class="text-[11px] font-medium text-teal-800">Baik</p>
+                                <p class="mt-1 text-lg font-extrabold leading-none text-teal-900">{{ $item['jumlah_baik'] }}</p>
                             </div>
-                            <div class="bg-amber-50/60 p-2.5 rounded-2xl border border-amber-100">
-                                <span class="text-[10px] text-amber-700 font-bold block">Dipantau</span>
-                                <span class="text-base font-black text-amber-800 mt-0.5 block">5</span>
+                            <div class="rounded-2xl border border-amber-100 bg-amber-50/60 px-2 py-3 text-center">
+                                <p class="text-[11px] font-medium text-amber-800">Dipantau</p>
+                                <p class="mt-1 text-lg font-extrabold leading-none text-amber-900">{{ $item['jumlah_pemantauan'] }}</p>
                             </div>
-                            <div class="bg-rose-50/60 p-2.5 rounded-2xl border border-rose-100">
-                                <span class="text-[10px] text-rose-700 font-bold block">Prioritas</span>
-                                <span class="text-base font-black text-rose-800 mt-0.5 block">1</span>
+                            <div class="rounded-2xl border border-rose-100 bg-rose-50/60 px-2 py-3 text-center">
+                                <p class="text-[11px] font-medium text-rose-800">Prioritas</p>
+                                <p class="mt-1 text-lg font-extrabold leading-none text-rose-900">{{ $item['jumlah_prioritas'] }}</p>
                             </div>
                         </div>
                     </a>
-
-                    <!-- Card Bayi & Balita (Bisa Di-klik) -->
-                    <a href="{{ route('kader.monitoring.show', 'balita') }}" class="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs space-y-4 hover:border-teal-500 hover:shadow-md transition-all group block">
-                        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center font-bold text-base">👶</div>
-                                <div>
-                                    <h4 class="font-extrabold text-slate-800 text-sm group-hover:text-teal-700 transition-colors">Bayi & Balita</h4>
-                                    <p class="text-[11px] text-slate-400">Total 42 Anak</p>
-                                </div>
-                            </div>
-                            <span class="text-teal-700 text-xs font-bold group-hover:translate-x-1 transition-transform">&rarr;</span>
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-2 text-center text-xs">
-                            <div class="bg-teal-50/60 p-2.5 rounded-2xl border border-teal-100">
-                                <span class="text-[10px] text-teal-700 font-bold block">Baik</span>
-                                <span class="text-base font-black text-teal-800 mt-0.5 block">35</span>
-                            </div>
-                            <div class="bg-amber-50/60 p-2.5 rounded-2xl border border-amber-100">
-                                <span class="text-[10px] text-amber-700 font-bold block">Dipantau</span>
-                                <span class="text-base font-black text-amber-800 mt-0.5 block">5</span>
-                            </div>
-                            <div class="bg-rose-50/60 p-2.5 rounded-2xl border border-rose-100">
-                                <span class="text-[10px] text-rose-700 font-bold block">Prioritas</span>
-                                <span class="text-base font-black text-rose-800 mt-0.5 block">2</span>
-                            </div>
-                        </div>
-                    </a>
-
-                    <!-- Card Lansia (Bisa Di-klik) -->
-                    <a href="{{ route('kader.monitoring.show', 'lansia') }}" class="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs space-y-4 hover:border-teal-500 hover:shadow-md transition-all group block">
-                        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-base">👵</div>
-                                <div>
-                                    <h4 class="font-extrabold text-slate-800 text-sm group-hover:text-teal-700 transition-colors">Lansia</h4>
-                                    <p class="text-[11px] text-slate-400">Total 62 Orang</p>
-                                </div>
-                            </div>
-                            <span class="text-teal-700 text-xs font-bold group-hover:translate-x-1 transition-transform">&rarr;</span>
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-2 text-center text-xs">
-                            <div class="bg-teal-50/60 p-2.5 rounded-2xl border border-teal-100">
-                                <span class="text-[10px] text-teal-700 font-bold block">Baik</span>
-                                <span class="text-base font-black text-teal-800 mt-0.5 block">52</span>
-                            </div>
-                            <div class="bg-amber-50/60 p-2.5 rounded-2xl border border-amber-100">
-                                <span class="text-[10px] text-amber-700 font-bold block">Dipantau</span>
-                                <span class="text-base font-black text-amber-800 mt-0.5 block">8</span>
-                            </div>
-                            <div class="bg-rose-50/60 p-2.5 rounded-2xl border border-rose-100">
-                                <span class="text-[10px] text-rose-700 font-bold block">Prioritas</span>
-                                <span class="text-base font-black text-rose-800 mt-0.5 block">2</span>
-                            </div>
-                        </div>
-                    </a>
-
-                </div>
+                @endforeach
             </div>
+        </section>
 
-        </div>
+        <p class="text-xs leading-relaxed text-slate-500">
+            Status pemantauan dibuat dari pemeriksaan yang tercatat dan indikator yang perlu ditinjau. Status ini bukan diagnosis medis.
+        </p>
     </div>
 </x-app-layout>

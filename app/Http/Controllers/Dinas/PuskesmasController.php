@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Dinas;
 
 use App\Http\Controllers\Controller;
-use App\Models\DinasKesehatan;
-use App\Models\Puskesmas;
+use App\Models\Puskesmas\Puskesmas;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,29 +11,29 @@ use Illuminate\Validation\Rule;
 
 class PuskesmasController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $puskesmas = Puskesmas::with('dinasKesehatan')
+        $puskesmas = Puskesmas::query()
+            ->where('dinas_kesehatan_id', $this->dinasKesehatanId($request))
+            ->with('dinasKesehatan')
             ->latest()
             ->paginate(10);
 
         return view('dinas.puskesmas.index', compact('puskesmas'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        $dinas = DinasKesehatan::orderBy('nama_dinas')->get();
+        $dinas = $request->user()->dinasKesehatan;
+        abort_if($dinas === null, 403, 'Akun Dinas Kesehatan belum terhubung dengan data Dinas.');
 
         return view('dinas.puskesmas.create', compact('dinas'));
     }
 
     public function store(Request $request)
     {
+        $dinasKesehatanId = $this->dinasKesehatanId($request);
         $validated = $request->validate([
-            'dinas_kesehatan_id' => [
-                'required',
-                'exists:dinas_kesehatan,id',
-            ],
             'nama_puskesmas' => 'required|string|max:255',
             'alamat' => 'required|string',
             'kecamatan' => 'required|string|max:255',
@@ -53,11 +52,12 @@ class PuskesmasController extends Controller
             ],
         ]);
 
-        DB::transaction(function () use ($validated) {
+        DB::transaction(function () use ($validated, $dinasKesehatanId) {
 
             $puskesmasData = collect($validated)
                 ->except(['password'])
                 ->all();
+            $puskesmasData['dinas_kesehatan_id'] = $dinasKesehatanId;
 
             $puskesmas = Puskesmas::create($puskesmasData);
 
@@ -78,9 +78,13 @@ class PuskesmasController extends Controller
             );
     }
 
-    public function edit(Puskesmas $puskesma)
+    public function edit(Request $request, Puskesmas $puskesma)
     {
-        $dinas = DinasKesehatan::orderBy('nama_dinas')->get();
+        abort_unless(
+            (int) $puskesma->dinas_kesehatan_id === $this->dinasKesehatanId($request),
+            404
+        );
+        $dinas = $puskesma->dinasKesehatan;
 
         return view('dinas.puskesmas.edit', [
             'puskesmas' => $puskesma,
@@ -90,11 +94,11 @@ class PuskesmasController extends Controller
 
     public function update(Request $request, Puskesmas $puskesma)
     {
+        abort_unless(
+            (int) $puskesma->dinas_kesehatan_id === $this->dinasKesehatanId($request),
+            404
+        );
         $validated = $request->validate([
-            'dinas_kesehatan_id' => [
-                'required',
-                'exists:dinas_kesehatan,id',
-            ],
             'nama_puskesmas' => 'required|string|max:255',
             'alamat' => 'required|string',
             'kecamatan' => 'required|string|max:255',
@@ -109,12 +113,24 @@ class PuskesmasController extends Controller
             ->with('success', 'Data Puskesmas berhasil diperbarui.');
     }
 
-    public function destroy(Puskesmas $puskesma)
+    public function destroy(Request $request, Puskesmas $puskesma)
     {
+        abort_unless(
+            (int) $puskesma->dinas_kesehatan_id === $this->dinasKesehatanId($request),
+            404
+        );
         $puskesma->delete();
 
         return redirect()
             ->route('dinas.puskesmas.index')
             ->with('success', 'Data Puskesmas berhasil dihapus.');
+    }
+
+    private function dinasKesehatanId(Request $request): int
+    {
+        $dinasKesehatanId = $request->user()->dinas_kesehatan_id;
+        abort_if($dinasKesehatanId === null, 403, 'Akun Dinas Kesehatan belum terhubung dengan data Dinas.');
+
+        return (int) $dinasKesehatanId;
     }
 }

@@ -36,7 +36,9 @@
                 [
                     'label' => 'Data Keluarga & Peserta',
                     'icon' => 'users',
-                    'status' => 'soon',
+                    'status' => 'ready',
+                    'match' => 'puskesmas.peserta.*',
+                    'url' => route('puskesmas.peserta.index'),
                     'accent' => 'text-gray-400',
                 ],
                 [
@@ -44,7 +46,7 @@
                     'icon' => 'key',
                     'status' => 'ready',
                     'match' => 'puskesmas.kader.*',
-                    'url' => route('puskesmas.kader.create'),
+                    'url' => route('puskesmas.kader.index'),
                     'accent' => 'text-blue-600',
                 ],
             ],
@@ -54,15 +56,19 @@
             'heading' => 'Pelayanan & Agenda',
             'items' => [
                 [
-                    'label' => 'Kegiatan & Sasaran',
+                    'label' => 'Kelola Kegiatan',
                     'icon' => 'calendar',
-                    'status' => 'soon',
+                    'status' => 'ready',
+                    'match' => 'puskesmas.kegiatan.*',
+                    'url' => route('puskesmas.kegiatan.index'),
                     'accent' => 'text-gray-400',
                 ],
                 [
-                    'label' => 'Monitor Kegiatan',
+                    'label' => 'Kelola Imunisasi',
                     'icon' => 'clipboard',
-                    'status' => 'soon',
+                    'status' => 'ready',
+                    'match' => 'puskesmas.imunisasi.*',
+                    'url' => route('puskesmas.imunisasi.index'),
                     'accent' => 'text-gray-400',
                 ],
                 [
@@ -80,9 +86,11 @@
             'heading' => 'Intervensi & Rujukan',
             'items' => [
                 [
-                    'label' => 'Tindak Lanjut (Rujukan Kader)',
+                    'label' => 'Tindak Lanjut Peserta',
                     'icon' => 'alert',
-                    'status' => 'soon',
+                    'status' => 'ready',
+                    'match' => 'puskesmas.tindak-lanjut.*',
+                    'url' => route('puskesmas.tindak-lanjut.index'),
                     'accent' => 'text-gray-400',
                 ],
             ],
@@ -94,13 +102,17 @@
                 [
                     'label' => 'Riwayat Pemeriksaan',
                     'icon' => 'clipboard',
-                    'status' => 'soon',
+                    'status' => 'ready',
+                    'match' => 'puskesmas.peserta.*',
+                    'url' => route('puskesmas.peserta.index'),
                     'accent' => 'text-gray-400',
                 ],
                 [
                     'label' => 'Monitoring Perkembangan',
                     'icon' => 'chart',
-                    'status' => 'soon',
+                    'status' => 'ready',
+                    'match' => 'puskesmas.monitoring.*',
+                    'url' => route('puskesmas.monitoring.index'),
                     'accent' => 'text-gray-400',
                 ],
             ],
@@ -123,13 +135,7 @@
        class="fixed inset-y-0 left-0 z-40 flex w-72 -translate-x-full flex-col border-r border-gray-200 bg-white transition-transform lg:static lg:translate-x-0">
 
     <div class="flex h-16 shrink-0 items-center gap-3 border-b border-gray-200 bg-teal-500 px-5">
-        <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-white/20 text-white">
-            <x-puskesmas.icon name="grid" class="h-5 w-5" />
-        </span>
-        <div class="min-w-0">
-            <p class="truncate text-sm font-bold text-white">SIPANDU</p>
-            <p class="truncate text-xs text-teal-50">Puskesmas Admin</p>
-        </div>
+        <x-sipandu-brand subtitle="Puskesmas Admin" :light="true" />
         <button type="button" data-sidebar-close
                 class="ml-auto rounded-md p-1 text-teal-50 transition-colors hover:bg-white/20 lg:hidden"
                 aria-label="Tutup menu">

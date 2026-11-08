@@ -21,6 +21,11 @@
             background: #f5f5f5;
             padding: 24px 4%;
             border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
         }
 
         header h1 {
@@ -134,9 +139,7 @@
 </head>
 
 <body>
-<header>
-    <h1>SIPANDU | Dinas Kesehatan</h1>
-</header>
+@include('dinas.partials.header')
 
 <main>
     <div class="heading">

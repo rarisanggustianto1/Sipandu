@@ -2,6 +2,7 @@
 
 namespace App\Models\Puskesmas;
 
+use App\Models\Dinas\DinasKesehatan;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;

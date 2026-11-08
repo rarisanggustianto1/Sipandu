@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Peserta;
 
 use App\Http\Controllers\Controller;
-use App\Models\Edukasi;
+use App\Models\Dinas\Edukasi;
 use Illuminate\Http\Request;
 
 class EdukasiController extends Controller

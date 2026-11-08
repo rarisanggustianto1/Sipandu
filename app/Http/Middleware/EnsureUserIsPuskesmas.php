@@ -10,9 +10,11 @@ class EnsureUserIsPuskesmas
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $user = auth()->user();
+        $user = $request->user();
 
-        if (! auth()->check() || $user->role !== 'tenaga_kesehatan' || ! $user->puskesmas_id) {
+        $isPuskesmas = $user && in_array($user->role, ['tenaga_kesehatan', 'puskesmas'], true);
+
+        if (! $user || ! $isPuskesmas || ! $user->puskesmas_id) {
             abort(403, 'Akses khusus Admin Puskesmas (tenaga kesehatan).');
         }
 

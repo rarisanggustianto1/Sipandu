@@ -21,6 +21,11 @@
             background: white;
             border-bottom: 1px solid #e5e7eb;
             padding: 22px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
         }
 
         header h1 {
@@ -197,9 +202,7 @@
 
 <body>
 
-<header>
-    <h1>SIPANDU | Dinas Kesehatan</h1>
-</header>
+@include('dinas.partials.header')
 
 <main>
     <h2 class="page-title">Laporan Kesehatan Wilayah</h2>

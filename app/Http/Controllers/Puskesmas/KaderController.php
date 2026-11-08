@@ -11,6 +11,18 @@ use Illuminate\View\View;
 
 class KaderController extends Controller
 {
+    public function index(): View
+    {
+        $kader = User::query()
+            ->where('puskesmas_id', auth()->user()->puskesmas_id)
+            ->whereIn('role', ['kader', 'kader_posyandu'])
+            ->with('posyandu')
+            ->orderBy('name')
+            ->paginate(15);
+
+        return view('puskesmas.kader.index', compact('kader'));
+    }
+
     public function create(): View
     {
         $posyandus = Posyandu::query()
@@ -36,7 +48,7 @@ class KaderController extends Controller
         ]);
 
         return redirect()
-            ->route('puskesmas.kader.create')
+            ->route('puskesmas.kader.index')
             ->with('status', "Akun {$validated['name']} berhasil didaftarkan sebagai kader posyandu.");
     }
 }

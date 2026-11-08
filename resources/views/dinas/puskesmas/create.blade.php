@@ -23,6 +23,11 @@
             background: #f5f5f5;
             padding: 20px 40px;
             border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
         }
 
         .navbar h2 {
@@ -97,9 +102,7 @@
 </head>
 <body>
 
-    <div class="navbar">
-        <h2>SIPANDU | Dinas Kesehatan</h2>
-    </div>
+    @include('dinas.partials.header')
 
     <div class="container">
         <h1>Tambah Puskesmas</h1>
@@ -116,34 +119,9 @@
 
                 @csrf
 
-                <div class="form-group">
-                    <label for="dinas_kesehatan_id">Dinas Kesehatan</label>
-
-                    <select name="dinas_kesehatan_id"
-                            id="dinas_kesehatan_id"
-                            required>
-
-                        <option value="">Pilih Dinas Kesehatan</option>
-
-                        @foreach ($dinas as $item)
-                            <option value="{{ $item->id }}"
-                                @selected(old('dinas_kesehatan_id') == $item->id)>
-                                {{ $item->nama_dinas }}
-                            </option>
-                        @endforeach
-
-                    </select>
-
-                    @error('dinas_kesehatan_id')
-                        <div class="error">{{ $message }}</div>
-                    @enderror
-
-                    @if ($dinas->isEmpty())
-                        <p class="info">
-                            Belum ada data Dinas Kesehatan.
-                            Tambahkan data Dinas Kesehatan terlebih dahulu.
-                        </p>
-                    @endif
+                <div class="form-group info">
+                    <strong>Dinas pengelola:</strong> {{ $dinas->nama_dinas }}.
+                    Puskesmas ini otomatis terhubung ke Dinas dari akun yang sedang login.
                 </div>
 
                 <div class="form-group">
@@ -251,8 +229,7 @@
 
                 <div class="actions">
                     <button type="submit"
-                            class="btn"
-                            @disabled($dinas->isEmpty())>
+                            class="btn">
                         Simpan Puskesmas
                     </button>
 

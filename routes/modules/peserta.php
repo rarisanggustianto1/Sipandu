@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Peserta\EdukasiController;
+use App\Http\Controllers\Peserta\JadwalController;
 use App\Http\Controllers\Peserta\KeluargaController;
 use App\Http\Controllers\Peserta\PesertaController;
 use App\Http\Controllers\Peserta\PesertaDashboardController;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 | Modul 4: Peserta / Keluarga
 |--------------------------------------------------------------------------
 | Hak akses: role 'keluarga' (atau alias 'peserta')
-| Meliputi: Beranda keluarga, kartu kesehatan digital, KMS balita, riwayat pemeriksaan, dan artikel edukasi kesehatan.
+| Meliputi: Beranda keluarga, jadwal Posyandu, kartu kesehatan digital, riwayat pemeriksaan, dan artikel edukasi kesehatan.
 */
 
 Route::prefix('peserta')
@@ -20,6 +21,7 @@ Route::prefix('peserta')
     ->group(function () {
         // Beranda Keluarga
         Route::get('/', PesertaDashboardController::class)->name('dashboard');
+        Route::get('jadwal', [JadwalController::class, 'index'])->name('jadwal.index');
 
         // Profil Kepala Keluarga & Anggota
         Route::get('keluarga', [KeluargaController::class, 'index'])->name('keluarga.index');

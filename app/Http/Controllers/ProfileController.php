@@ -16,12 +16,20 @@ class ProfileController extends Controller
     public function update(UpdateProfileRequest $request): RedirectResponse
     {
         $data = $request->validated();
+        $user = $request->user();
+        $emailChanged = array_key_exists('email', $data) && $user->email !== $data['email'];
 
-        if (blank($data['password'])) {
+        if (blank($data['password'] ?? null)) {
             unset($data['password']);
         }
 
-        $request->user()->update($data);
+        $user->fill($data);
+
+        if ($emailChanged) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
 
         return redirect()->route('profile')->with('status', 'Profil berhasil diperbarui.');
     }

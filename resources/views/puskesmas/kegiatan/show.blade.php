@@ -60,5 +60,12 @@
             </div>
         </div>
     </section>
+
+    @if ($kegiatan->catatan_laporan)
+        <section class="rounded-xl border border-teal-100 bg-teal-50 p-5">
+            <h2 class="font-bold text-teal-950">Catatan dari Kader</h2>
+            <p class="mt-2 whitespace-pre-line text-sm text-teal-900">{{ $kegiatan->catatan_laporan }}</p>
+        </section>
+    @endif
 </div>
 @endsection

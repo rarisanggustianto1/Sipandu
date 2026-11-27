@@ -1,7 +1,6 @@
-<form method="POST" action="{{ route('logout') }}" style="margin: 0;">
+<form method="POST" action="{{ route('logout') }}" class="m-0" onsubmit="return confirm('Yakin ingin keluar dari akun?')">
     @csrf
-    <button type="submit"
-            style="padding: 10px 14px; border: 1px solid #ccc; border-radius: 6px; background: #fff; color: #333; font: inherit; cursor: pointer;">
+    <button type="submit" class="dinas-sidebar-logout">
         Keluar
     </button>
 </form>

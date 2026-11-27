@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Models\Dinas\DinasKesehatan;
 use App\Models\Kader\JadwalKegiatan;
 use App\Models\Kader\Pemeriksaan;
-use App\Models\Kader\TindakLanjut;
 use App\Models\Peserta\Keluarga;
 use App\Models\Peserta\Peserta;
 use App\Models\Puskesmas\Posyandu;
@@ -125,7 +124,7 @@ class PuskesmasPortalTest extends TestCase
         );
     }
 
-    public function test_puskesmas_can_manage_activities_immunization_and_follow_up(): void
+    public function test_puskesmas_can_manage_activities_and_immunization(): void
     {
         $puskesmas = User::where('email', 'puskesmas@gmail.com')->firstOrFail();
         $posyanduId = Posyandu::where('nama_posyandu', 'Posyandu Demo')->value('id');
@@ -163,28 +162,6 @@ class PuskesmasPortalTest extends TestCase
             'status' => 'terjadwal',
         ]);
 
-        $pemeriksaan = Pemeriksaan::where('peserta_id', $participant->id)->firstOrFail();
-        $tindakLanjut = TindakLanjut::create([
-            'pemeriksaan_id' => $pemeriksaan->id,
-            'tanggal_pengajuan' => now()->toDateString(),
-            'alasan_tindak_lanjut' => 'Perlu pemeriksaan lanjutan',
-            'status' => 'diajukan',
-        ]);
-
-        $this->actingAs($puskesmas)
-            ->put(route('puskesmas.tindak-lanjut.update', $tindakLanjut), [
-                'status' => 'diproses',
-                'jenis_tindak_lanjut' => 'Kunjungan Puskesmas',
-                'tanggal_tindak_lanjut' => '2026-12-03',
-                'hasil_tindak_lanjut' => 'Dijadwalkan untuk kunjungan',
-            ])
-            ->assertRedirect(route('puskesmas.tindak-lanjut.index'));
-
-        $this->assertDatabaseHas('tindak_lanjut', [
-            'id' => $tindakLanjut->id,
-            'status' => 'diproses',
-            'jenis_tindak_lanjut' => 'Kunjungan Puskesmas',
-        ]);
     }
 
     public function test_puskesmas_schedule_drives_kader_attendance_examination_and_meeting_report(): void
@@ -223,7 +200,8 @@ class PuskesmasPortalTest extends TestCase
             ->get(route('kader.jadwal.show', $kegiatan))
             ->assertOk()
             ->assertSee($participant->nama)
-            ->assertSee('Absensi peserta');
+            ->assertSee('Absensi peserta')
+            ->assertSee('Catatan untuk laporan Puskesmas');
 
         $this->actingAs($kader)
             ->get(route('kader.pemeriksaan.create', ['kegiatan_id' => $kegiatan->id, 'peserta_id' => $participant->id]))
@@ -271,7 +249,15 @@ class PuskesmasPortalTest extends TestCase
         ]);
 
         $this->actingAs($kader)
-            ->post(route('kader.jadwal.finish', $kegiatan))
+            ->get(route('kader.jadwal.show', $kegiatan))
+            ->assertOk()
+            ->assertViewHas('jadwal', fn (JadwalKegiatan $jadwal): bool => $jadwal->peserta_hadir_count === 1
+                && $jadwal->petugas_hadir_count === 1);
+
+        $this->actingAs($kader)
+            ->post(route('kader.jadwal.finish', $kegiatan), [
+                'catatan_laporan' => 'Kegiatan berjalan lancar.',
+            ])
             ->assertRedirect(route('kader.jadwal.show', $kegiatan));
 
         $report = $this->actingAs($puskesmas)
@@ -282,11 +268,155 @@ class PuskesmasPortalTest extends TestCase
             ->assertSee('Pemeriksaan dilakukan')
             ->assertSee('Petugas yang hadir')
             ->assertSee('Sinta')
-            ->assertSee('Kader Posyandu');
+            ->assertSee('Kader Posyandu')
+            ->assertSee('Kegiatan berjalan lancar.');
+
+        $this->assertDatabaseHas('kegiatan', [
+            'id' => $kegiatan->id,
+            'catatan_laporan' => 'Kegiatan berjalan lancar.',
+            'status' => 'selesai',
+        ]);
 
         $laporan = $report->viewData('kegiatan');
         $this->assertSame(1, (int) $laporan->peserta_hadir_count);
         $this->assertSame(1, (int) $laporan->pemeriksaans_count);
         $this->assertSame(1, (int) $laporan->petugas_hadir_count);
+    }
+
+    public function test_examination_from_kader_menu_is_attached_to_the_only_active_meeting_today(): void
+    {
+        $kader = User::where('email', 'kader@gmail.com')->firstOrFail();
+        $participant = Peserta::where('nama', 'Sinta')->firstOrFail();
+        $posyanduId = Posyandu::where('nama_posyandu', 'Posyandu Demo')->value('id');
+        $meeting = JadwalKegiatan::create([
+            'posyandu_id' => $posyanduId,
+            'nama_kegiatan' => 'Pertemuan pemeriksaan langsung',
+            'jenis_kegiatan' => 'Posyandu Rutin',
+            'tanggal_kegiatan' => today()->toDateString(),
+            'waktu_mulai' => '09:00',
+            'status' => 'berlangsung',
+        ]);
+
+        $this->actingAs($kader)
+            ->post(route('kader.pemeriksaan.store'), [
+                'peserta_id' => $participant->id,
+                'tanggal_pemeriksaan' => today()->toDateString(),
+                'berat_badan' => 12.5,
+            ])
+            ->assertRedirect(route('kader.pemeriksaan.index'));
+
+        $this->assertDatabaseHas('pemeriksaan', [
+            'peserta_id' => $participant->id,
+            'kegiatan_id' => $meeting->id,
+        ]);
+        $this->assertDatabaseHas('peserta_kegiatan', [
+            'kegiatan_id' => $meeting->id,
+            'peserta_id' => $participant->id,
+            'status_kehadiran' => 'hadir',
+        ]);
+
+        $this->actingAs($kader)
+            ->get(route('kader.jadwal.show', $meeting))
+            ->assertOk()
+            ->assertSee($participant->nama)
+            ->assertViewHas('jadwal', fn (JadwalKegiatan $jadwal): bool => $jadwal->peserta_hadir_count === 1
+                && $jadwal->pemeriksaans_count === 1);
+    }
+
+    public function test_examination_from_kader_menu_is_not_attached_when_multiple_active_meetings_match_today(): void
+    {
+        $kader = User::where('email', 'kader@gmail.com')->firstOrFail();
+        $participant = Peserta::where('nama', 'Sinta')->firstOrFail();
+        $posyanduId = Posyandu::where('nama_posyandu', 'Posyandu Demo')->value('id');
+
+        $meetings = collect(['Pertemuan pertama hari ini', 'Pertemuan kedua hari ini'])
+            ->map(fn (string $name): JadwalKegiatan => JadwalKegiatan::create([
+                'posyandu_id' => $posyanduId,
+                'nama_kegiatan' => $name,
+                'jenis_kegiatan' => 'Posyandu Rutin',
+                'tanggal_kegiatan' => today()->toDateString(),
+                'waktu_mulai' => '09:00',
+                'status' => 'berlangsung',
+            ]));
+
+        $this->actingAs($kader)
+            ->post(route('kader.pemeriksaan.store'), [
+                'peserta_id' => $participant->id,
+                'tanggal_pemeriksaan' => today()->toDateString(),
+                'berat_badan' => 12.5,
+            ])
+            ->assertRedirect(route('kader.pemeriksaan.index'));
+
+        $this->assertDatabaseHas('pemeriksaan', [
+            'peserta_id' => $participant->id,
+            'kegiatan_id' => null,
+        ]);
+        foreach ($meetings as $meeting) {
+            $this->assertDatabaseMissing('peserta_kegiatan', [
+                'kegiatan_id' => $meeting->id,
+                'peserta_id' => $participant->id,
+            ]);
+        }
+    }
+
+    public function test_unlinked_examinations_are_backfilled_only_for_one_matching_meeting(): void
+    {
+        $participant = Peserta::where('nama', 'Sinta')->firstOrFail();
+        $posyanduId = Posyandu::where('nama_posyandu', 'Posyandu Demo')->value('id');
+        $meetingDate = today()->subDay()->toDateString();
+        $meeting = JadwalKegiatan::create([
+            'posyandu_id' => $posyanduId,
+            'nama_kegiatan' => 'Pertemuan pemeriksaan tunggal',
+            'jenis_kegiatan' => 'Posyandu Rutin',
+            'tanggal_kegiatan' => $meetingDate,
+            'waktu_mulai' => '09:00',
+            'status' => 'selesai',
+        ]);
+        $ambiguousMeetingDate = today()->subDays(2)->toDateString();
+        $firstAmbiguousMeeting = JadwalKegiatan::create([
+            'posyandu_id' => $posyanduId,
+            'nama_kegiatan' => 'Pertemuan ganda pertama',
+            'jenis_kegiatan' => 'Posyandu Rutin',
+            'tanggal_kegiatan' => $ambiguousMeetingDate,
+            'waktu_mulai' => '09:00',
+            'status' => 'selesai',
+        ]);
+        JadwalKegiatan::create([
+            'posyandu_id' => $posyanduId,
+            'nama_kegiatan' => 'Pertemuan ganda kedua',
+            'jenis_kegiatan' => 'Posyandu Rutin',
+            'tanggal_kegiatan' => $ambiguousMeetingDate,
+            'waktu_mulai' => '10:00',
+            'status' => 'selesai',
+        ]);
+        $unlinkedExamination = Pemeriksaan::create([
+            'peserta_id' => $participant->id,
+            'tanggal_pemeriksaan' => $meetingDate,
+        ]);
+        $ambiguousExamination = Pemeriksaan::create([
+            'peserta_id' => $participant->id,
+            'tanggal_pemeriksaan' => $ambiguousMeetingDate,
+        ]);
+
+        $migration = require database_path('migrations/2026_11_26_151836_link_unassigned_examinations_to_unique_meetings.php');
+        $migration->up();
+
+        $this->assertDatabaseHas('pemeriksaan', [
+            'id' => $unlinkedExamination->id,
+            'kegiatan_id' => $meeting->id,
+        ]);
+        $this->assertDatabaseHas('peserta_kegiatan', [
+            'kegiatan_id' => $meeting->id,
+            'peserta_id' => $participant->id,
+            'status_kehadiran' => 'hadir',
+        ]);
+        $this->assertDatabaseHas('pemeriksaan', [
+            'id' => $ambiguousExamination->id,
+            'kegiatan_id' => null,
+        ]);
+        $this->assertDatabaseMissing('peserta_kegiatan', [
+            'kegiatan_id' => $firstAmbiguousMeeting->id,
+            'peserta_id' => $participant->id,
+        ]);
     }
 }

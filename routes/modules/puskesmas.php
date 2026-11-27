@@ -2,12 +2,11 @@
 
 use App\Http\Controllers\Puskesmas\DashboardController;
 use App\Http\Controllers\Puskesmas\ImunisasiController;
-use App\Http\Controllers\Puskesmas\KegiatanController;
 use App\Http\Controllers\Puskesmas\KaderController;
-use App\Http\Controllers\Puskesmas\PengaduanController;
+use App\Http\Controllers\Puskesmas\KegiatanController;
+use App\Http\Controllers\Puskesmas\LaporanBulananController;
 use App\Http\Controllers\Puskesmas\PesertaController;
 use App\Http\Controllers\Puskesmas\PosyanduController;
-use App\Http\Controllers\Puskesmas\TindakLanjutController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 | Modul 2: Puskesmas (Tenaga Kesehatan)
 |--------------------------------------------------------------------------
 | Hak akses: role 'tenaga_kesehatan' (atau alias 'puskesmas') dengan penugasan puskesmas_id
-| Meliputi: Dashboard operasional, master data Posyandu binaan, manajemen akun Kader, dan respon aduan masyarakat.
+| Meliputi: Dashboard operasional, master data Posyandu binaan, manajemen akun Kader, agenda, dan laporan bulanan.
 */
 
 Route::prefix('puskesmas')
@@ -35,16 +34,16 @@ Route::prefix('puskesmas')
         Route::get('peserta/{data}', [PesertaController::class, 'show'])->name('peserta.show');
         Route::get('monitoring', [PesertaController::class, 'index'])->name('monitoring.index');
 
-        // Kegiatan, imunisasi, dan tindak lanjut kesehatan
+        // Agenda kegiatan, imunisasi, dan pelaporan bulanan ke Dinas
         Route::resource('kegiatan', KegiatanController::class);
         Route::resource('imunisasi', ImunisasiController::class)->except(['show']);
-        Route::get('tindak-lanjut', [TindakLanjutController::class, 'index'])->name('tindak-lanjut.index');
-        Route::put('tindak-lanjut/{id}', [TindakLanjutController::class, 'update'])->name('tindak-lanjut.update');
-
-        // Pengaduan & Layanan Masyarakat
-        Route::get('pengaduan', [PengaduanController::class, 'index'])->name('pengaduan.index');
-        Route::get('pengaduan/{pengaduan}', [PengaduanController::class, 'show'])->name('pengaduan.show');
-        Route::put('pengaduan/{pengaduan}', [PengaduanController::class, 'update'])->name('pengaduan.update');
+        Route::get('laporan-bulanan', [LaporanBulananController::class, 'index'])->name('laporan-bulanan.index');
+        Route::get('laporan-bulanan/create', [LaporanBulananController::class, 'create'])->name('laporan-bulanan.create');
+        Route::post('laporan-bulanan', [LaporanBulananController::class, 'store'])->name('laporan-bulanan.store');
+        Route::get('laporan-bulanan/{laporanBulanan}', [LaporanBulananController::class, 'show'])->name('laporan-bulanan.show');
+        Route::put('laporan-bulanan/{laporanBulanan}', [LaporanBulananController::class, 'update'])->name('laporan-bulanan.update');
+        Route::put('laporan-bulanan/{laporanBulanan}/refresh', [LaporanBulananController::class, 'refresh'])->name('laporan-bulanan.refresh');
+        Route::post('laporan-bulanan/{laporanBulanan}/submit', [LaporanBulananController::class, 'submit'])->name('laporan-bulanan.submit');
 
         // Pendaftaran Akun Kader
         Route::get('kader', [KaderController::class, 'index'])->name('kader.index');

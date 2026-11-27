@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\Models\Puskesmas\Puskesmas;
-use App\Models\Puskesmas\Posyandu;
-use App\Models\Puskesmas\Pengaduan;
 use App\Models\Dinas\DinasKesehatan;
 use App\Models\Peserta\Keluarga;
+use App\Models\Puskesmas\Pengaduan;
+use App\Models\Puskesmas\Posyandu;
+use App\Models\Puskesmas\Puskesmas;
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +17,7 @@ use Illuminate\Notifications\Notifiable;
 
 #[Fillable(['name', 'email', 'password', 'role', 'dinas_kesehatan_id', 'puskesmas_id', 'posyandu_id', 'keluarga_id'])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;

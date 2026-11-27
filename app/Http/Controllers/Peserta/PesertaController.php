@@ -61,7 +61,7 @@ class PesertaController extends Controller
             ->load([
                 'keluarga.posyandu',
                 'pemeriksaan' => fn ($query) => $query
-                    ->with(['balita', 'bumil', 'lansia'])
+                    ->with(['balita', 'bumil', 'lansia', 'kegiatan.posyandu'])
                     ->latest('tanggal_pemeriksaan')
                     ->latest('id'),
                 'imunisasi' => fn ($query) => $query

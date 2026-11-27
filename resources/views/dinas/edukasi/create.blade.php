@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tambah Edukasi | SIPANDU</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         * { box-sizing: border-box; }
@@ -203,10 +204,12 @@
 @include('dinas.partials.header')
 
 <main>
-    <h2>Tambah Edukasi</h2>
-    <p class="subtitle">
-        Buat artikel kesehatan secara manual atau import dari PDF.
-    </p>
+    <div class="dinas-page-header">
+        <h1 class="page-title">Tambah Edukasi</h1>
+        <p class="subtitle">
+            Buat artikel kesehatan secara manual atau import dari PDF.
+        </p>
+    </div>
 
     @if(session('success'))
         <div class="success">{{ session('success') }}</div>

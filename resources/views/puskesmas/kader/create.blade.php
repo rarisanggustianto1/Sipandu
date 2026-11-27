@@ -60,7 +60,7 @@
                 </div>
 
                 <div class="flex gap-3">
-                    <button type="submit" class="rounded-md px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 transition-colors">Daftarkan Kader</button>
+                    <button type="submit" class="rounded-md bg-teal-700 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-teal-800">Daftarkan Kader</button>
                     <a href="{{ route('puskesmas.dashboard') }}"
                        class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Batal</a>
                 </div>

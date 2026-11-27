@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Peserta;
 
 use App\Http\Controllers\Controller;
+use App\Models\Kader\JadwalKegiatan;
 use App\Models\Peserta\Keluarga;
-use App\Models\Puskesmas\Kegiatan;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -29,10 +29,12 @@ class PesertaDashboardController extends Controller
         $totalLansia = $perKategori->get('lansia', 0);
         $totalPeserta = $peserta->count();
 
-        $kegiatanBerikutnya = Kegiatan::query()
-            ->where('posyandu_id', $keluarga->posyandu_id)
+        $kegiatanBerikutnya = JadwalKegiatan::query()
+            ->forPosyandu($keluarga->posyandu_id)
             ->whereDate('tanggal_kegiatan', '>=', now()->toDateString())
+            ->whereIn('status', ['terjadwal', 'berlangsung'])
             ->orderBy('tanggal_kegiatan')
+            ->orderBy('waktu_mulai')
             ->first();
 
         $pesertaTerbaru = $peserta->sortByDesc('created_at')->take(5);

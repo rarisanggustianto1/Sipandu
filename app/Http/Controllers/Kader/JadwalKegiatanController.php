@@ -47,10 +47,10 @@ class JadwalKegiatanController extends Controller
             ])
             ->withCount([
                 'peserta as peserta_hadir_count' => fn (Builder $query) => $query
-                    ->wherePivot('status_kehadiran', 'hadir'),
+                    ->where('peserta_kegiatan.status_kehadiran', 'hadir'),
                 'pemeriksaans',
                 'petugas as petugas_hadir_count' => fn (Builder $query) => $query
-                    ->wherePivot('status_kehadiran', 'hadir'),
+                    ->where('kegiatan_petugas.status_kehadiran', 'hadir'),
             ])
             ->findOrFail($id);
 
@@ -139,7 +139,14 @@ class JadwalKegiatanController extends Controller
         abort_unless($jadwal->tanggal_kegiatan?->isToday(), 403, 'Pertemuan hanya dapat diselesaikan pada tanggal yang dijadwalkan.');
         abort_unless($jadwal->status === 'berlangsung', 403, 'Pertemuan ini belum dimulai.');
 
-        $jadwal->update(['status' => 'selesai']);
+        $validated = $request->validate([
+            'catatan_laporan' => ['nullable', 'string', 'max:10000'],
+        ]);
+
+        $jadwal->update([
+            ...$validated,
+            'status' => 'selesai',
+        ]);
 
         return redirect()->route('kader.jadwal.show', $jadwal)->with('success', 'Pertemuan Posyandu selesai dan laporan telah diperbarui.');
     }

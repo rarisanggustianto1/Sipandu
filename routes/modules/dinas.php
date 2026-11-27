@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Dinas\DinasDashboardController;
 use App\Http\Controllers\Dinas\EdukasiController;
+use App\Http\Controllers\Dinas\LaporanBulananController;
 use App\Http\Controllers\Dinas\PuskesmasController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +29,6 @@ Route::prefix('dinas')
         Route::resource('edukasi', EdukasiController::class)->except(['show']);
 
         // Laporan Rekapitulasi Wilayah
-        Route::view('laporan', 'dinas.laporan.index')->name('laporan.index');
+        Route::get('laporan', [LaporanBulananController::class, 'index'])->name('laporan.index');
+        Route::get('laporan/{laporanBulanan}', [LaporanBulananController::class, 'show'])->name('laporan.show');
     });
-

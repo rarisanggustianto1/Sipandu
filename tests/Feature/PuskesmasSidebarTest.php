@@ -37,28 +37,21 @@ class PuskesmasSidebarTest extends TestCase
         ]);
     }
 
-    public function test_sidebar_menampilkan_semua_kelompok_menu(): void
+    public function test_sidebar_menampilkan_menu_puskesmas_yang_tersedia(): void
     {
         $response = $this->actingAs($this->makeUser())->get(route('puskesmas.dashboard'));
 
         $response->assertOk();
 
         foreach ([
-            'Puskesmas Admin',
-            'Master Data',
-            'Pelayanan &amp; Agenda',
-            'Intervensi &amp; Rujukan',
-            'Rekap &amp; Analitik',
+            'Puskesmas',
             'Data Posyandu',
-            'Data Keluarga &amp; Peserta',
+            'Data Peserta &amp; KIA',
             'Kelola Akun Kader',
-            'Kegiatan &amp; Sasaran',
-            'Monitor Kegiatan',
-            'Pengaduan &amp; Tanggapan',
-            'Tindak Lanjut (Rujukan Kader)',
-            'Riwayat Pemeriksaan',
+            'Kelola Kegiatan',
+            'Kelola Imunisasi',
+            'Laporan Bulanan ke Dinas',
             'Monitoring Perkembangan',
-            'Segera',
         ] as $needle) {
             $response->assertSee($needle, escape: false);
         }
@@ -75,13 +68,14 @@ class PuskesmasSidebarTest extends TestCase
             ->assertSee('aria-current="page"', escape: false);
     }
 
-    public function test_menu_yang_belum_ada_tidak_menghasilkan_link(): void
+    public function test_menu_pengaduan_dan_tindak_lanjut_yang_dihapus_tidak_tampil(): void
     {
-        $html = $this->actingAs($this->makeUser())
+        $response = $this->actingAs($this->makeUser())
             ->get(route('puskesmas.dashboard'))
-            ->getContent();
+            ->assertOk();
 
-        $this->assertStringNotContainsString('>Kegiatan &amp; Sasaran</a>', $html);
-        $this->assertStringContainsString('cursor-not-allowed', $html);
+        $response
+            ->assertDontSee('Pengaduan & Tanggapan')
+            ->assertDontSee('Tindak Lanjut (Rujukan Kader)');
     }
 }

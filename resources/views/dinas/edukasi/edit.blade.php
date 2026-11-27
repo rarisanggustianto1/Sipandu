@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Edukasi | SIPANDU</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         * {
@@ -114,10 +115,12 @@
 @include('dinas.partials.header')
 
 <main>
-    <h2>Edit Edukasi</h2>
-    <p class="subtitle">
-        Perbarui informasi kesehatan yang sudah terdaftar.
-    </p>
+    <div class="dinas-page-header">
+        <h1 class="page-title">Edit Edukasi</h1>
+        <p class="subtitle">
+            Perbarui informasi kesehatan yang sudah terdaftar.
+        </p>
+    </div>
 
     <div class="card">
         <form action="{{ route('dinas.edukasi.update', $edukasi->id) }}"
@@ -223,7 +226,7 @@
                 </button>
 
                 <a href="{{ route('dinas.edukasi.index') }}"
-                   class="btn">
+                   class="btn btn-secondary">
                     Batal
                 </a>
             </div>

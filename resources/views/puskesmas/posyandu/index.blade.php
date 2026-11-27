@@ -26,7 +26,6 @@
                             <th class="px-3 py-2">Kelurahan</th>
                             <th class="px-3 py-2">Kecamatan</th>
                             <th class="px-3 py-2">Telepon</th>
-                            <th class="px-3 py-2">Pengaduan</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
@@ -37,7 +36,6 @@
                                 <td class="px-3 py-2 text-gray-700">{{ $p->kelurahan }}</td>
                                 <td class="px-3 py-2 text-gray-700">{{ $p->kecamatan }}</td>
                                 <td class="px-3 py-2 text-gray-700">{{ $p->telepon ?? '-' }}</td>
-                                <td class="px-3 py-2 text-gray-700">{{ $p->total_pengaduan }}</td>
                             </tr>
                         @endforeach
                     </tbody>

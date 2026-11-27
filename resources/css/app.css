@@ -10,6 +10,17 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
+:root {
+    --sipandu-canvas: #f1f5f9;
+    --sipandu-surface: #ffffff;
+    --sipandu-border: #e2e8f0;
+    --sipandu-heading: #0f172a;
+    --sipandu-muted: #64748b;
+    --sipandu-primary: #0f766e;
+    --sipandu-primary-hover: #115e59;
+    --sipandu-primary-soft: #f0fdfa;
+}
+
 form :is(
     input:not([type='checkbox'], [type='radio'], [type='hidden'], [type='submit'], [type='reset'], [type='button'], [type='image']),
     select,

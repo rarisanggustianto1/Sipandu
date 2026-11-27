@@ -32,7 +32,7 @@ class RoleAccessTest extends TestCase
         $roleRoutes = [
             'dinas_kesehatan' => route('dinas.dashboard'),
             'tenaga_kesehatan' => route('puskesmas.dashboard'),
-            'kader' => route('kader.pemeriksaan.index'),
+            'kader' => route('kader.dashboard'),
             'keluarga' => route('peserta.dashboard'),
         ];
 
@@ -127,7 +127,7 @@ class RoleAccessTest extends TestCase
         $roleRoutes = [
             'dinas@gmail.com' => route('dinas.dashboard'),
             'puskesmas@gmail.com' => route('puskesmas.dashboard'),
-            'kader@gmail.com' => route('kader.pemeriksaan.index'),
+            'kader@gmail.com' => route('kader.dashboard'),
             'peserta@gmail.com' => route('peserta.dashboard'),
         ];
 

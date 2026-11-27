@@ -52,7 +52,7 @@ class PesertaController extends Controller
             ->findOrFail($data->id);
 
         $riwayat = $peserta->pemeriksaan()
-            ->with(['balita', 'bumil', 'lansia'])
+            ->with(['balita', 'bumil', 'lansia', 'kegiatan.posyandu'])
             ->latest('tanggal_pemeriksaan')
             ->latest('id')
             ->get();

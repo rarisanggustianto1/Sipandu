@@ -70,19 +70,28 @@
         'lansia' => 'bg-indigo-50 text-indigo-800 ring-indigo-200',
         default => 'bg-teal-50 text-teal-800 ring-teal-200',
     };
+    $isFamilyRecord = request()->routeIs('peserta.data.show');
 @endphp
 
 <div class="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-    <div class="flex flex-wrap items-center justify-between gap-3">
+    <header class="sticky top-0 z-10 -mx-4 -mt-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-50/95 px-4 py-4 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
         <a href="{{ $backUrl }}" class="inline-flex items-center gap-2 text-sm font-semibold text-teal-800 transition hover:text-teal-950">
             <span aria-hidden="true">←</span> {{ $backLabel }}
         </a>
+        <div class="order-first w-full sm:order-none sm:w-auto sm:flex-1 sm:px-4">
+            <h1 class="text-lg font-extrabold text-slate-900 sm:text-xl">
+                {{ $isFamilyRecord ? 'Rekam medis keluarga' : 'Kartu kesehatan peserta' }} · {{ $peserta->nama }}
+            </h1>
+            <p class="mt-0.5 text-xs text-slate-500">
+                {{ $isFamilyRecord ? 'Riwayat pemeriksaan dan kegiatan Posyandu anggota keluarga.' : 'Riwayat pemeriksaan dan pemantauan kesehatan peserta.' }}
+            </p>
+        </div>
         @if ($recordUrl)
             <a href="{{ $recordUrl }}" class="inline-flex items-center justify-center rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2">
                 + Catat pemeriksaan
             </a>
         @endif
-    </div>
+    </header>
 
     <article class="relative isolate overflow-hidden rounded-3xl bg-gradient-to-br {{ $kategoriWarna }} p-5 text-white shadow-lg sm:p-8">
         <div class="pointer-events-none absolute -right-14 -top-20 h-64 w-64 rounded-full border-[32px] border-white/10"></div>
@@ -93,7 +102,7 @@
                 <img src="{{ asset('images/sipandu-logo.png') }}" alt="Logo SIPANDU" class="h-14 w-14 rounded-2xl bg-white object-contain p-1 shadow-sm">
                 <div>
                     <p class="text-xs font-bold uppercase tracking-[0.2em] text-white/75">Buku pemantauan kesehatan</p>
-                    <h1 class="mt-1 text-2xl font-black tracking-wide sm:text-3xl">Kartu Kesehatan</h1>
+                    <p class="mt-1 text-2xl font-black tracking-wide sm:text-3xl">Kartu Kesehatan</p>
                     <p class="mt-1 text-sm font-medium text-white/85">SIPANDU · Sahabat sehat keluarga</p>
                 </div>
             </div>
@@ -196,6 +205,7 @@
             <div>
                 <h2 class="text-lg font-extrabold text-slate-900">Riwayat pemeriksaan</h2>
                 <p class="mt-1 text-sm text-slate-500">{{ $riwayat->count() }} catatan · dari yang terbaru</p>
+                <p class="mt-1 text-xs text-slate-500">Nama kegiatan dan Posyandu ditampilkan jika pemeriksaan ditautkan ke jadwal. Catatan tanpa jadwal diberi keterangan tersendiri.</p>
             </div>
             <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">{{ $peserta->label_kategori }}</span>
         </div>
@@ -216,6 +226,16 @@
                         <div>
                             <h3 class="font-bold text-slate-900">{{ $item->tanggal_pemeriksaan?->format('d F Y') ?? 'Tanggal tidak tersedia' }}</h3>
                             <p class="mt-0.5 text-xs text-slate-500">{{ $peserta->label_kategori }} · Pemeriksaan Posyandu</p>
+                            @if ($item->kegiatan)
+                                <p class="mt-1 text-sm font-semibold text-teal-800">
+                                    Agenda Posyandu: {{ $item->kegiatan->nama_kegiatan }}
+                                    @if ($item->kegiatan->posyandu)
+                                        · {{ $item->kegiatan->posyandu->nama_posyandu }}
+                                    @endif
+                                </p>
+                            @else
+                                <p class="mt-1 text-xs text-slate-500">Pemeriksaan ini tidak ditautkan ke agenda kegiatan Posyandu.</p>
+                            @endif
                         </div>
                     </div>
                     @if (request()->routeIs('kader.peserta.show'))

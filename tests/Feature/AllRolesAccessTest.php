@@ -39,6 +39,11 @@ class AllRolesAccessTest extends TestCase
                 ->assertDontSee('🏥')
                 ->assertDontSee('📖');
         }
+
+        $this->actingAs($dinasUser)
+            ->get(route('profile'))
+            ->assertOk()
+            ->assertSee('Profil');
     }
 
     public function test_puskesmas_can_access_all_puskesmas_pages(): void
@@ -56,10 +61,10 @@ class AllRolesAccessTest extends TestCase
             route('puskesmas.kegiatan.show', 1),
             route('puskesmas.imunisasi.index'),
             route('puskesmas.imunisasi.create'),
-            route('puskesmas.tindak-lanjut.index'),
+            route('puskesmas.laporan-bulanan.index'),
             route('puskesmas.kader.index'),
             route('puskesmas.kader.create'),
-            route('puskesmas.pengaduan.index'),
+            route('profile'),
         ];
 
         foreach ($routes as $url) {
@@ -71,12 +76,22 @@ class AllRolesAccessTest extends TestCase
                 ->assertSee('Data Peserta & KIA')
                 ->assertSee('Kelola Kegiatan')
                 ->assertSee('Kelola Imunisasi')
-                ->assertSee('Tindak Lanjut Peserta')
+                ->assertSee('Laporan Bulanan ke Dinas')
                 ->assertSee('Monitoring Perkembangan')
+                ->assertDontSee('Pengaduan & Tanggapan')
+                ->assertDontSee('Tindak Lanjut Peserta')
                 ->assertDontSee('📊')
                 ->assertDontSee('🏥')
                 ->assertDontSee('💉');
         }
+
+        $this->actingAs($puskesmasUser)
+            ->get('/puskesmas/tindak-lanjut')
+            ->assertNotFound();
+
+        $this->actingAs($puskesmasUser)
+            ->get('/puskesmas/pengaduan')
+            ->assertNotFound();
     }
 
     public function test_kader_can_access_all_kader_pages(): void
@@ -93,6 +108,7 @@ class AllRolesAccessTest extends TestCase
             route('kader.jadwal.show', 1),
             route('kader.imunisasi.index'),
             route('kader.imunisasi.create'),
+            route('profile'),
         ];
 
         foreach ($routes as $url) {
@@ -116,6 +132,7 @@ class AllRolesAccessTest extends TestCase
             route('peserta.data.index'),
             route('peserta.keluarga.index'),
             route('peserta.edukasi.index'),
+            route('profile'),
         ];
 
         foreach ($routes as $url) {

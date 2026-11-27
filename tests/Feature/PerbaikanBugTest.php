@@ -3,9 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\Puskesmas\Posyandu;
+use App\Models\Puskesmas\Puskesmas;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class PerbaikanBugTest extends TestCase
@@ -75,7 +77,7 @@ class PerbaikanBugTest extends TestCase
 
         $this->assertNotNull($posyandu);
         $this->assertSame('Posyandu Melati', $posyandu->nama_posyandu);
-        $this->assertInstanceOf(\App\Models\Puskesmas\Puskesmas::class, $posyandu->puskesmas);
+        $this->assertInstanceOf(Puskesmas::class, $posyandu->puskesmas);
         $this->assertCount(0, $posyandu->pengaduans);
     }
 
@@ -91,50 +93,29 @@ class PerbaikanBugTest extends TestCase
             ->assertOk();
     }
 
-    public function test_pencarian_pengaduan_tidak_menggunakan_ilike(): void
+    public function test_puskesmas_cannot_open_or_respond_to_family_complaints(): void
     {
         $s = $this->buatData();
-        $this->buatPengaduan($s, 'Air Bersih Mati');
+        $id = $this->buatPengaduan($s, 'Air Bersih Mati');
 
-        $response = $this->actingAs($s['user'])
-            ->get(route('puskesmas.pengaduan.index', ['search' => 'Bersih']));
+        $this->actingAs($s['user'])
+            ->get('/puskesmas/pengaduan')
+            ->assertNotFound();
 
-        $response->assertOk();
-        $response->assertSee('Air Bersih Mati');
-    }
-
-    public function test_kirim_tanggapan_mengalihkan_halalamat_bukan_json(): void
-    {
-        $s = $this->buatData();
-        $id = $this->buatPengaduan($s);
-
-        $response = $this->actingAs($s['user'])->put(
-            route('puskesmas.pengaduan.update', $id),
-            ['status' => 'diproses', 'tanggapan_puskesmas' => 'Sudah kami tangani bersama timATIVE.']
-        );
-
-        $response->assertRedirect(route('puskesmas.pengaduan.show', $id));
-        $response->assertSessionHas('status');
+        $this->actingAs($s['user'])
+            ->put("/puskesmas/pengaduan/{$id}", [
+                'status' => 'diproses',
+                'tanggapan_puskesmas' => 'Tanggapan tidak dapat dikirim melalui akun Puskesmas.',
+            ])
+            ->assertNotFound();
 
         $this->assertDatabaseHas('pengaduan', [
-            'id' => $id, 'status' => 'diproses',
+            'id' => $id,
+            'status' => 'baru',
         ]);
     }
 
-    public function test_pengaduan_selesai_tidak_bisa_diubah(): void
-    {
-        $s = $this->buatData();
-        $id = $this->buatPengaduan($s, 'Sudah Ditangani', ['status' => 'selesai']);
-
-        $this->actingAs($s['user'])->put(
-            route('puskesmas.pengaduan.update', $id),
-            ['status' => 'diproses', 'tanggapan_puskesmas' => 'Mencoba diubah lagi.']
-        );
-
-        $this->assertDatabaseHas('pengaduan', ['id' => $id, 'status' => 'selesai']);
-    }
-
-    public function test_daftar_posyandu_menghitung_jumlah_pengaduan(): void
+    public function test_daftar_posyandu_does_not_display_complaint_management(): void
     {
         $s = $this->buatData();
         $this->buatPengaduan($s, 'Pengaduan Satu');
@@ -144,16 +125,14 @@ class PerbaikanBugTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Posyandu Melati');
-        $response->assertSee('2');
+        $response->assertDontSee('Pengaduan');
     }
 
-public function test_status_pengaduan_konsisten_dengan_enum_database(): void
+    public function test_existing_complaint_statuses_remain_valid_in_the_database(): void
     {
         $s = $this->buatData();
 
-        $statusList = \App\Http\Controllers\Puskesmas\PengaduanController::STATUS;
-
-        $this->assertSame(['baru', 'diproses', 'selesai'], $statusList);
+        $statusList = ['baru', 'diproses', 'selesai'];
 
         // Setiap status harus benar-benar diterima database (portable, tanpa PRAGMA).
         foreach ($statusList as $status) {
@@ -175,20 +154,13 @@ public function test_status_pengaduan_konsisten_dengan_enum_database(): void
             'Semua status dari controller harus valid di database'
         );
 
-        // Filter di halaman daftar harus bekerja untuk tiap status.
-        foreach ($statusList as $status) {
-            $this->actingAs($s['user'])
-                ->get(route('puskesmas.pengaduan.index', ['status' => $status]))
-                ->assertOk()
-                ->assertSee("Pengaduan status {$status}");
-        }
     }
 
     public function test_daftar_kader_hanya_posyandu_milik_sendiri(): void
     {
         $s = $this->buatData();
 
-// Posyandu milik Puskesmas lain
+        // Posyandu milik Puskesmas lain
         $s['dinasId'] = DB::table('dinas_kesehatan')->insertGetId([
             'nama_dinas' => 'Dinas Kedua', 'created_at' => now(), 'updated_at' => now(),
         ]);
@@ -211,7 +183,7 @@ public function test_status_pengaduan_konsisten_dengan_enum_database(): void
         $response->assertDontSee('Posyandu Asing');
     }
 
-public function test_daftar_kader_menolak_posyandu_milik_puskesmas_lain(): void
+    public function test_daftar_kader_menolak_posyandu_milik_puskesmas_lain(): void
     {
         $s = $this->buatData();
 
@@ -258,7 +230,7 @@ public function test_daftar_kader_menolak_posyandu_milik_puskesmas_lain(): void
         $this->assertNotNull($kader);
         $this->assertSame('kader', $kader->role);
         $this->assertNotSame('password123', $kader->password, 'Sandi harus di-hash');
-        $this->assertTrue(\Illuminate\Support\Facades\Hash::check('password123', $kader->password));
+        $this->assertTrue(Hash::check('password123', $kader->password));
     }
 
     public function test_dashboard_tampil_dengan_data(): void
@@ -269,6 +241,7 @@ public function test_daftar_kader_menolak_posyandu_milik_puskesmas_lain(): void
         $this->actingAs($s['user'])
             ->get(route('puskesmas.dashboard'))
             ->assertOk()
-            ->assertSee('Dashboard Puskesmas');
+            ->assertSee('Dashboard Puskesmas')
+            ->assertDontSee('Pengaduan');
     }
 }

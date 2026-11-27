@@ -173,7 +173,22 @@ class PemeriksaanController extends Controller
             ...$categoryRules,
         ]);
 
-        DB::transaction(function () use ($validated, $peserta, $kegiatan): void {
+        $autoAttend = false;
+        if ($kegiatan === null && $validated['tanggal_pemeriksaan'] === today()->toDateString()) {
+            $matchingMeetings = JadwalKegiatan::query()
+                ->forPosyandu($request->user()->posyandu_id)
+                ->whereDate('tanggal_kegiatan', today())
+                ->where('status', 'berlangsung')
+                ->limit(2)
+                ->get();
+
+            if ($matchingMeetings->count() === 1) {
+                $kegiatan = $matchingMeetings->first();
+                $autoAttend = true;
+            }
+        }
+
+        DB::transaction(function () use ($validated, $peserta, $kegiatan, $autoAttend): void {
             $pemeriksaan = Pemeriksaan::create([
                 'peserta_id' => $peserta->id,
                 'kegiatan_id' => $kegiatan?->id,
@@ -181,6 +196,12 @@ class PemeriksaanController extends Controller
                 'keluhan' => $validated['keluhan'] ?? null,
                 'catatan' => $validated['catatan'] ?? null,
             ]);
+
+            if ($autoAttend) {
+                $kegiatan->peserta()->syncWithoutDetaching([
+                    $peserta->id => ['status_kehadiran' => 'hadir'],
+                ]);
+            }
 
             if ($peserta->kategori === 'balita') {
                 PemeriksaanBalita::create([

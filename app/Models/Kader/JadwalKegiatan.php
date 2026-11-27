@@ -29,6 +29,7 @@ class JadwalKegiatan extends Model
         'jam_mulai',
         'jam_selesai',
         'keterangan',
+        'catatan_laporan',
     ];
 
     protected function casts(): array

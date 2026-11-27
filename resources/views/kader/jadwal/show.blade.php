@@ -35,24 +35,38 @@
                 <button class="mt-4 rounded-xl bg-teal-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-teal-800">Mulai Pertemuan</button>
             </form>
         @elseif ($pertemuanAktif)
-            <section class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-teal-200 bg-teal-50 p-5">
+            <section class="space-y-4 rounded-2xl border border-teal-200 bg-teal-50 p-5">
                 <div>
                     <h2 class="font-bold text-teal-950">Pertemuan sedang berlangsung</h2>
                     <p class="mt-1 text-sm text-teal-800">Catat kehadiran dan pemeriksaan peserta pada pertemuan ini.</p>
                 </div>
-                <div class="flex flex-wrap gap-2">
+                <div class="grid gap-4 {{ $jadwal->petugas->contains('id', auth()->id()) ? 'sm:grid-cols-1' : 'sm:grid-cols-2' }}">
                     @unless ($jadwal->petugas->contains('id', auth()->id()))
-                        <form method="POST" action="{{ route('kader.jadwal.check-in', $jadwal) }}">
+                        <form method="POST" action="{{ route('kader.jadwal.check-in', $jadwal) }}" class="rounded-xl border border-teal-100 bg-white p-4">
                             @csrf
-                            <button class="rounded-xl border border-teal-700 px-4 py-2.5 text-sm font-bold text-teal-800 hover:bg-teal-100">Absen sebagai Petugas</button>
+                            <h3 class="font-bold text-slate-800">Kehadiran petugas</h3>
+                            <p class="mt-1 text-sm text-slate-500">Catat kehadiran Anda pada pertemuan ini.</p>
+                            <button class="mt-4 rounded-xl border border-teal-700 px-4 py-2.5 text-sm font-bold text-teal-800 transition hover:bg-teal-50">Absen sebagai Petugas</button>
                         </form>
                     @endunless
-                    <a href="{{ route('kader.pemeriksaan.create', ['kegiatan_id' => $jadwal->id]) }}" class="rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-teal-800">Catat Pemeriksaan</a>
-                    <form method="POST" action="{{ route('kader.jadwal.finish', $jadwal) }}" onsubmit="return confirm('Selesaikan pertemuan dan tutup pencatatan?')">
-                        @csrf
-                        <button class="rounded-xl bg-slate-800 px-4 py-2.5 text-sm font-bold text-white hover:bg-slate-900">Selesaikan Pertemuan</button>
-                    </form>
+                    <a href="{{ route('kader.pemeriksaan.create', ['kegiatan_id' => $jadwal->id]) }}" class="flex min-h-32 flex-col justify-between rounded-xl border border-teal-100 bg-white p-4 transition hover:border-teal-300">
+                        <span>
+                            <span class="block font-bold text-slate-800">Catat pemeriksaan</span>
+                            <span class="mt-1 block text-sm text-slate-500">Pilih peserta dan catat hasil pemeriksaan kegiatan ini.</span>
+                        </span>
+                        <span class="mt-4 inline-flex w-fit rounded-xl bg-teal-700 px-4 py-2.5 text-sm font-bold text-white">Mulai mencatat</span>
+                    </a>
                 </div>
+                <form method="POST" action="{{ route('kader.jadwal.finish', $jadwal) }}" class="rounded-xl border border-slate-200 bg-white p-4" onsubmit="return confirm('Selesaikan pertemuan dan tutup pencatatan?')">
+                    @csrf
+                    <div class="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+                        <div>
+                            <label for="catatan_laporan" class="mb-1 block text-sm font-semibold text-slate-700">Catatan untuk laporan Puskesmas (opsional)</label>
+                            <textarea id="catatan_laporan" name="catatan_laporan" rows="2" maxlength="10000" class="w-full rounded-xl border-slate-300 text-sm" placeholder="Ringkasan pelaksanaan, kendala, atau kebutuhan tindak lanjut">{{ old('catatan_laporan', $jadwal->catatan_laporan) }}</textarea>
+                        </div>
+                        <button class="rounded-xl bg-slate-800 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-slate-900">Selesaikan Pertemuan</button>
+                    </div>
+                </form>
             </section>
 
             <form method="POST" action="{{ route('kader.jadwal.attendance', $jadwal) }}" class="space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -100,6 +114,13 @@
             <div class="rounded-2xl border border-slate-200 bg-white p-5 text-sm text-slate-600">
                 Absensi dan pemeriksaan hanya tersedia saat pertemuan berlangsung pada tanggal yang dijadwalkan.
             </div>
+        @endif
+
+        @if ($jadwal->status === 'selesai' && $jadwal->catatan_laporan)
+            <section class="rounded-2xl border border-slate-200 bg-white p-5">
+                <h2 class="font-bold text-slate-800">Catatan laporan kegiatan</h2>
+                <p class="mt-2 whitespace-pre-line text-sm text-slate-600">{{ $jadwal->catatan_laporan }}</p>
+            </section>
         @endif
 
         <section class="grid gap-6 lg:grid-cols-2">

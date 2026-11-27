@@ -12,21 +12,21 @@
         </style>
     @endif
 </head>
-<body class="min-h-screen bg-gray-100 text-gray-900">
+<body class="h-dvh overflow-hidden bg-slate-100 font-sans text-slate-900">
     @php
         $hasSidebar = auth()->check();
     @endphp
 
     @if ($hasSidebar)
-        <div class="flex min-h-screen">
+        <div class="flex h-dvh overflow-hidden">
             <div id="sidebar-backdrop"
                  class="fixed inset-0 z-30 hidden bg-gray-900/50 lg:hidden"
                  data-sidebar-close></div>
 
             @include('layouts.partials.sidebar')
 
-            <div class="flex min-w-0 flex-1 flex-col">
-                <main class="relative mx-auto w-full min-w-0 max-w-7xl flex-1 px-4 pb-6 pt-16 lg:px-8 lg:py-6">
+            <div class="flex h-dvh min-w-0 flex-1 flex-col overflow-hidden">
+                <main class="relative mx-auto h-dvh w-full min-h-0 min-w-0 max-w-7xl flex-1 overflow-y-auto overscroll-contain px-4 pb-6 pt-16 lg:px-8 lg:py-6">
                     <button type="button"
                             data-sidebar-open
                             class="fixed left-4 top-4 z-20 rounded-lg border border-gray-200 bg-white p-2 text-gray-700 shadow-sm transition-colors hover:bg-gray-50 lg:hidden"
@@ -47,7 +47,7 @@
             </div>
         </div>
     @else
-        <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <main class="mx-auto h-dvh max-w-7xl overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
             @include('layouts.partials.flash')
             @isset($header)
                 <div class="mb-6 border-b border-gray-200 pb-4">

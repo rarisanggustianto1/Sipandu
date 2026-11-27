@@ -64,6 +64,16 @@ class HealthRecordSynchronizationTest extends TestCase
             'lingkar_kepala' => 49,
         ]);
 
+        $agenda = JadwalKegiatan::create([
+            'posyandu_id' => $sinta->keluarga->posyandu_id,
+            'nama_kegiatan' => 'Posyandu 1',
+            'jenis_kegiatan' => 'Pemeriksaan',
+            'tanggal_kegiatan' => '2026-11-08',
+            'lokasi' => 'Balai Posyandu',
+            'status' => 'selesai',
+        ]);
+        $pemeriksaan->update(['kegiatan_id' => $agenda->id]);
+
         $this->actingAs($kader)
             ->get(route('kader.peserta.index'))
             ->assertOk()
@@ -77,6 +87,7 @@ class HealthRecordSynchronizationTest extends TestCase
             ->assertSee('Grafik pertumbuhan & kesehatan', escape: false)
             ->assertSee('polyline points="', escape: false)
             ->assertSee('Riwayat pemeriksaan')
+            ->assertSee('Agenda Posyandu: Posyandu 1')
             ->assertSee('Catat pemeriksaan')
             ->assertSee('images/sipandu-logo.png')
             ->assertSee('Pemeriksaan terbaru Sinta')
@@ -88,11 +99,34 @@ class HealthRecordSynchronizationTest extends TestCase
             ->get(route('peserta.data.show', $sinta))
             ->assertOk()
             ->assertSee('Kartu Kesehatan')
+            ->assertSee('Rekam medis keluarga · Sinta')
             ->assertSee('Grafik pertumbuhan & kesehatan', escape: false)
             ->assertSee('polyline points="', escape: false)
             ->assertSee('Riwayat pemeriksaan')
+            ->assertSee('Agenda Posyandu: Posyandu 1')
             ->assertSee('13.4')
             ->assertSee('images/sipandu-logo.png');
+    }
+
+    public function test_kader_sees_separate_attendance_and_examination_actions_during_an_active_meeting(): void
+    {
+        $kader = User::where('email', 'kader@gmail.com')->firstOrFail();
+        $jadwal = JadwalKegiatan::create([
+            'posyandu_id' => $kader->posyandu_id,
+            'nama_kegiatan' => 'Pertemuan Aktif',
+            'jenis_kegiatan' => 'Pemeriksaan',
+            'tanggal_kegiatan' => today()->toDateString(),
+            'lokasi' => 'Balai Posyandu',
+            'status' => 'berlangsung',
+        ]);
+
+        $this->actingAs($kader)
+            ->get(route('kader.jadwal.show', $jadwal))
+            ->assertOk()
+            ->assertSee('Kehadiran petugas')
+            ->assertSee('Absen sebagai Petugas')
+            ->assertSee('Catat pemeriksaan')
+            ->assertSee('Selesaikan Pertemuan');
     }
 
     public function test_kader_examination_page_lists_participants_by_category_and_links_to_the_record_form(): void

@@ -44,7 +44,7 @@
                                     <td class="p-3.5">{{ $item->tanggal_pemberian ? $item->tanggal_pemberian->format('d M Y') : '-' }}</td>
                                     <td class="p-3.5">
                                         <span class="px-2.5 py-1 rounded-full text-[10px] font-bold 
-                                            {{ $item->status === 'selesai' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800' }}">
+                                            {{ $item->status === 'selesai' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' }}">
                                             {{ ucfirst($item->status ?? 'selesai') }}
                                         </span>
                                     </td>

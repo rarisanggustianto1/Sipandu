@@ -14,7 +14,6 @@ class PosyanduController extends Controller
     {
         $posyandu = Posyandu::query()
             ->where('puskesmas_id', auth()->user()->puskesmas_id)
-            ->withCount(['pengaduans as total_pengaduan'])
             ->latest()
             ->get();
 

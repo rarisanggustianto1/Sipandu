@@ -4,17 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Laporan | SIPANDU</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
         * {
             box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #fff;
-            color: #222;
         }
 
         header {
@@ -113,20 +107,6 @@
             cursor: not-allowed;
         }
 
-        .summary {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 18px;
-            margin-bottom: 24px;
-        }
-
-        .summary-card {
-            background: white;
-            padding: 24px;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-        }
-
         .summary-card p {
             margin: 0 0 12px;
             color: #666;
@@ -205,13 +185,13 @@
 @include('dinas.partials.header')
 
 <main>
-    <h2 class="page-title">Laporan Kesehatan Wilayah</h2>
-    <p class="subtitle">
-        Lihat dan rekap laporan kegiatan Posyandu berdasarkan
-        wilayah binaan Puskesmas.
-    </p>
+    <div class="dinas-page-header">
+        <h1 class="page-title">Laporan Kesehatan Wilayah</h1>
+        <p class="subtitle">
+            Rekap bulanan kegiatan Posyandu yang telah dikirim oleh Puskesmas di wilayah Anda.
+        </p>
+    </div>
 
-    <!-- FILTER LAPORAN -->
     <div class="card">
         <h3>Filter Laporan</h3>
 
@@ -224,42 +204,28 @@
                     <label for="puskesmas">Puskesmas</label>
                     <select name="puskesmas" id="puskesmas">
                         <option value="">Semua Puskesmas</option>
+                        @foreach ($puskesmasList as $puskesmas)
+                            <option value="{{ $puskesmas->id }}" @selected((string) request('puskesmas') === (string) $puskesmas->id)>
+                                {{ $puskesmas->nama_puskesmas }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
-
                 <div>
-                    <label for="posyandu">Posyandu</label>
-                    <select name="posyandu" id="posyandu">
-                        <option value="">Semua Posyandu</option>
+                    <label for="bulan">Bulan</label>
+                    <select name="bulan" id="bulan">
+                        <option value="">Semua Bulan</option>
+                        @foreach (range(1, 12) as $month)
+                            <option value="{{ $month }}" @selected((string) request('bulan') === (string) $month)>
+                                {{ \Illuminate\Support\Carbon::createFromDate(now()->year, $month, 1)->translatedFormat('F') }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
-
                 <div>
-                    <label for="jenis">Jenis Laporan</label>
-                    <select name="jenis" id="jenis">
-                        <option value="">Semua Jenis</option>
-                        <option value="pemeriksaan">Pemeriksaan</option>
-                        <option value="imunisasi">Imunisasi</option>
-                        <option value="kegiatan">Kegiatan Posyandu</option>
-                    </select>
+                    <label for="tahun">Tahun</label>
+                    <input type="number" name="tahun" id="tahun" min="2000" max="{{ now()->year }}" value="{{ request('tahun') }}">
                 </div>
-
-                <div>
-                    <label for="tanggal_mulai">Tanggal Mulai</label>
-                    <input type="date"
-                           name="tanggal_mulai"
-                           id="tanggal_mulai"
-                           value="{{ request('tanggal_mulai') }}">
-                </div>
-
-                <div>
-                    <label for="tanggal_selesai">Tanggal Selesai</label>
-                    <input type="date"
-                           name="tanggal_selesai"
-                           id="tanggal_selesai"
-                           value="{{ request('tanggal_selesai') }}">
-                </div>
-
             </div>
 
             <div class="filter-actions">
@@ -268,77 +234,63 @@
                 </button>
 
                 <a href="{{ route('dinas.laporan.index') }}"
-                   class="btn">
+                   class="btn btn-secondary">
                     Reset
                 </a>
             </div>
         </form>
     </div>
 
-    <!-- RINGKASAN -->
     <div class="summary">
         <div class="summary-card">
             <p>Total Laporan</p>
-            <h2>0</h2>
+            <h2>{{ number_format($totalReports, 0, ',', '.') }}</h2>
         </div>
-
         <div class="summary-card">
             <p>Puskesmas Terlibat</p>
-            <h2>0</h2>
-        </div>
-
-        <div class="summary-card">
-            <p>Posyandu Terlibat</p>
-            <h2>0</h2>
+            <h2>{{ number_format($puskesmasTerlibat, 0, ',', '.') }}</h2>
         </div>
     </div>
 
-    <!-- TABEL LAPORAN -->
     <div class="card">
-
         <div class="table-header">
-            <h3>Daftar Laporan</h3>
-
-            <div class="table-actions">
-                <button type="button" class="btn" disabled>
-                    Unduh PDF
-                </button>
-
-                <button type="button" class="btn" disabled>
-                    Unduh CSV
-                </button>
-            </div>
+            <h3>Daftar Laporan Bulanan</h3>
         </div>
 
         <div class="table-wrapper">
-            <table>
+            <table class="report-table">
                 <thead>
                     <tr>
                         <th>No.</th>
-                        <th>Tanggal</th>
+                        <th>Periode</th>
                         <th>Puskesmas</th>
-                        <th>Posyandu</th>
-                        <th>Jenis Laporan</th>
-                        <th>Jumlah Data</th>
+                        <th>Pertemuan</th>
+                        <th>Peserta Hadir</th>
+                        <th>Pemeriksaan</th>
+                        <th>Dikirim</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
-
                 <tbody>
-                    <tr>
-                        <td colspan="7">
-                            <div class="empty">
-                                Belum ada data laporan yang ditampilkan.
-                                <p>
-                                    Data akan muncul setelah halaman
-                                    terhubung dengan modul Kader dan Puskesmas.
-                                </p>
-                            </div>
-                        </td>
-                    </tr>
+                    @forelse ($reports as $report)
+                        @php($summary = $report->data['ringkasan'] ?? [])
+                        <tr>
+                            <td>{{ $reports->firstItem() + $loop->index }}</td>
+                            <td>{{ \Illuminate\Support\Carbon::createFromDate($report->tahun, $report->bulan, 1)->translatedFormat('F Y') }}</td>
+                            <td>{{ $report->puskesmas->nama_puskesmas }}</td>
+                            <td>{{ number_format($summary['jumlah_pertemuan'] ?? 0, 0, ',', '.') }}</td>
+                            <td>{{ number_format($summary['peserta_hadir'] ?? 0, 0, ',', '.') }}</td>
+                            <td>{{ number_format($summary['pemeriksaan'] ?? 0, 0, ',', '.') }}</td>
+                            <td>{{ $report->dikirim_pada?->translatedFormat('d M Y') ?? '—' }}</td>
+                            <td><a href="{{ route('dinas.laporan.show', $report) }}" class="btn btn-edit">Lihat</a></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="8" class="empty">Belum ada laporan terkirim pada filter tersebut.</td></tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
+        <div class="pagination">{{ $reports->links() }}</div>
     </div>
 
     <a href="{{ route('dinas.dashboard') }}" class="back">

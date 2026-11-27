@@ -19,12 +19,12 @@
                 <div>
                     <h2 class="font-bold text-slate-800">Jadwal Posyandu berikutnya</h2>
                     @if ($kegiatanBerikutnya)
-                        <p class="mt-1 text-sm text-slate-600">{{ $kegiatanBerikutnya->nama_kegiatan }} · {{ $kegiatanBerikutnya->tanggal_kegiatan?->format('d M Y') }} · {{ $kegiatanBerikutnya->waktu_mulai }}</p>
+                        <p class="mt-1 text-sm text-slate-600">{{ $kegiatanBerikutnya->nama_kegiatan }} · {{ $kegiatanBerikutnya->tanggal_kegiatan?->translatedFormat('d M Y') }} · {{ $kegiatanBerikutnya->waktu_mulai ? substr((string) $kegiatanBerikutnya->waktu_mulai, 0, 5) : 'Waktu belum ditentukan' }}</p>
                     @else
                         <p class="mt-1 text-sm text-slate-500">Belum ada jadwal mendatang.</p>
                     @endif
                 </div>
-                <a href="{{ route('peserta.keluarga.index') }}" class="text-sm font-semibold text-teal-800">Lihat keluarga →</a>
+                <a href="{{ route('peserta.jadwal.index') }}" class="text-sm font-semibold text-teal-800">Lihat semua jadwal →</a>
             </div>
         </section>
 

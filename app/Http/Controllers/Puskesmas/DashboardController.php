@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Puskesmas;
 
 use App\Http\Controllers\Controller;
-use App\Models\Puskesmas\Keluarga;
 use App\Models\Puskesmas\Kegiatan;
-use App\Models\Puskesmas\Pengaduan;
+use App\Models\Puskesmas\Keluarga;
+use App\Models\Puskesmas\LaporanBulanan;
 use App\Models\Puskesmas\Pemeriksaan;
 use App\Models\Puskesmas\Peserta;
 use Illuminate\Database\Eloquent\Builder;
@@ -31,12 +31,6 @@ class DashboardController extends Controller
             ->whereYear('tanggal_pemeriksaan', now()->year)
             ->count();
 
-        $pengaduanPerStatus = Pengaduan::query()
-            ->selectRaw('status, COUNT(*) as total')
-            ->whereHas('posyandu', fn (Builder $q) => $q->where('puskesmas_id', $this->puskesmasId()))
-            ->groupBy('status')
-            ->pluck('total', 'status');
-
         $kegiatanTerjadwal = Kegiatan::query()
             ->with('posyandu')
             ->whereHas('posyandu', fn (Builder $q) => $q->where('puskesmas_id', $this->puskesmasId()))
@@ -46,15 +40,18 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        $totalPengaduan = (int) $pengaduanPerStatus->sum();
+        $laporanBulanIni = LaporanBulanan::query()
+            ->where('puskesmas_id', $this->puskesmasId())
+            ->where('tahun', now()->year)
+            ->where('bulan', now()->month)
+            ->value('status');
 
         return view('puskesmas.dashboard', compact(
             'keluargaCount',
             'pesertaPerKategori',
             'pemeriksaanBulanIni',
-            'pengaduanPerStatus',
             'kegiatanTerjadwal',
-            'totalPengaduan'
+            'laporanBulanIni',
         ));
     }
 

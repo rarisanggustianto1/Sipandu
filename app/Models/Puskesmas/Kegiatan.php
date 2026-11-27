@@ -5,7 +5,7 @@ namespace App\Models\Puskesmas;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 
-#[Fillable(['posyandu_id', 'nama_kegiatan', 'jenis_kegiatan', 'deskripsi', 'tanggal_kegiatan', 'waktu_mulai', 'lokasi', 'status'])]
+#[Fillable(['posyandu_id', 'nama_kegiatan', 'jenis_kegiatan', 'deskripsi', 'tanggal_kegiatan', 'waktu_mulai', 'lokasi', 'status', 'catatan_laporan'])]
 class Kegiatan extends Model
 {
     protected $table = 'kegiatan';

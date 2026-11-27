@@ -7,10 +7,10 @@ use App\Models\Peserta\Keluarga;
 use App\Models\Peserta\Peserta;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
 
 class PesertaController extends Controller
 {
@@ -45,7 +45,7 @@ class PesertaController extends Controller
                 ->latest('id'),
         ]);
         $riwayat = $data->pemeriksaan()
-            ->with(['balita', 'bumil', 'lansia'])
+            ->with(['balita', 'bumil', 'lansia', 'kegiatan.posyandu'])
             ->latest('tanggal_pemeriksaan')
             ->latest('id')
             ->get();

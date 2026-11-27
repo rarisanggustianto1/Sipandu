@@ -71,28 +71,6 @@
                     'url' => route('puskesmas.imunisasi.index'),
                     'accent' => 'text-gray-400',
                 ],
-                [
-                    'label' => 'Pengaduan & Tanggapan',
-                    'icon' => 'chat',
-                    'status' => 'ready',
-                    'match' => 'puskesmas.pengaduan.*',
-                    'url' => route('puskesmas.pengaduan.index'),
-                    'accent' => 'text-rose-600',
-                ],
-            ],
-        ],
-        [
-            'key' => 'intervensi-rujukan',
-            'heading' => 'Intervensi & Rujukan',
-            'items' => [
-                [
-                    'label' => 'Tindak Lanjut Peserta',
-                    'icon' => 'alert',
-                    'status' => 'ready',
-                    'match' => 'puskesmas.tindak-lanjut.*',
-                    'url' => route('puskesmas.tindak-lanjut.index'),
-                    'accent' => 'text-gray-400',
-                ],
             ],
         ],
         [
@@ -115,6 +93,14 @@
                     'url' => route('puskesmas.monitoring.index'),
                     'accent' => 'text-gray-400',
                 ],
+                [
+                    'label' => 'Laporan Bulanan ke Dinas',
+                    'icon' => 'chart',
+                    'status' => 'ready',
+                    'match' => 'puskesmas.laporan-bulanan.*',
+                    'url' => route('puskesmas.laporan-bulanan.index'),
+                    'accent' => 'text-teal-600',
+                ],
             ],
         ],
     ];
@@ -132,7 +118,7 @@
 @endphp
 
 <aside id="sidebar"
-       class="fixed inset-y-0 left-0 z-40 flex w-72 -translate-x-full flex-col border-r border-gray-200 bg-white transition-transform lg:static lg:translate-x-0">
+       class="fixed inset-y-0 left-0 z-40 flex h-dvh w-72 -translate-x-full flex-col border-r border-gray-200 bg-white transition-transform lg:static lg:h-dvh lg:shrink-0 lg:translate-x-0">
 
     <div class="flex h-16 shrink-0 items-center gap-3 border-b border-gray-200 bg-teal-500 px-5">
         <x-sipandu-brand subtitle="Puskesmas Admin" :light="true" />
@@ -143,7 +129,7 @@
         </button>
     </div>
 
-    <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+    <nav class="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain px-3 py-4">
 
         {{-- Menu tunggal (tidak di dalam folder) --}}
         <ul class="space-y-1">

@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Http\Controllers\Puskesmas\PengaduanController;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -34,7 +33,7 @@ class PostgreSqlLiveTest extends TestCase
         $this->assertSame('pgsql', DB::connection()->getDriverName());
     }
 
-    public function test_enum_status_sesuai_kontroler(): void
+    public function test_enum_status_mendukung_status_pengaduan_tersimpan(): void
     {
         $rows = DB::select(
             "SELECT pg_get_constraintdef(oid) AS def FROM pg_constraint
@@ -43,7 +42,7 @@ class PostgreSqlLiveTest extends TestCase
 
         $this->assertNotEmpty($rows);
 
-        foreach (PengaduanController::STATUS as $status) {
+        foreach (['baru', 'diproses', 'selesai'] as $status) {
             $this->assertStringContainsString("'{$status}'", $rows[0]->def);
         }
     }
@@ -123,7 +122,7 @@ class PostgreSqlLiveTest extends TestCase
             ->assertOk()
             ->assertSee('Dashboard Puskesmas');
 
-        // --- 5. Pengaduan + pencarian case-insensitive (uji LOWER LIKE di PG) ---
+        // --- 5. Pengaduan keluarga tetap tersimpan; Puskesmas tidak lagi mengelolanya ---
         $warga = User::create([
             'name' => 'Warga',
             'email' => 'warga@pg.test',
@@ -144,23 +143,22 @@ class PostgreSqlLiveTest extends TestCase
         ]);
 
         $this->actingAs($admin)
-            ->get(route('puskesmas.pengaduan.index', ['search' => 'BERSIH']))
-            ->assertOk()
-            ->assertSee('Air Bersih Mati');
+            ->get('/puskesmas/pengaduan')
+            ->assertNotFound();
 
-        // --- 6. Tipelago balasan pengaduan ---
+        // --- 6. Endpoint tanggapan Puskesmas tidak tersedia ---
         $pengaduanId = DB::table('pengaduan')->value('id');
 
         $this->actingAs($admin)
-            ->put(route('puskesmas.pengaduan.update', $pengaduanId), [
+            ->put("/puskesmas/pengaduan/{$pengaduanId}", [
                 'status' => 'diproses',
                 'tanggapan_puskesmas' => 'Sudah kami tangani bersama tim.',
             ])
-            ->assertRedirect();
+            ->assertNotFound();
 
         $this->assertDatabaseHas('pengaduan', [
             'id' => $pengaduanId,
-            'status' => 'diproses',
+            'status' => 'baru',
         ]);
     }
 }

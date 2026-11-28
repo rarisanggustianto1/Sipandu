@@ -1,7 +1,6 @@
 <x-app-layout>
-    <div class="mx-auto max-w-2xl space-y-5 px-4 py-8 sm:px-6 lg:px-8">
+    <div class="w-full space-y-5 px-4 py-8 sm:px-6 lg:px-8">
         <div>
-            <a href="{{ route('peserta.keluarga.index') }}" class="text-sm font-semibold text-teal-800">← Kembali ke keluarga</a>
             <h1 class="mt-3 text-2xl font-black text-slate-800">Daftarkan anggota keluarga</h1>
             <p class="mt-1 text-sm text-slate-500">Anggota akan otomatis terhubung ke keluarga dan Posyandu pada akun Anda.</p>
         </div>

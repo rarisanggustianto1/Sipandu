@@ -51,7 +51,7 @@ class PesertaController extends Controller
         ]);
 
         return redirect()
-            ->route('peserta.data.show', $peserta)
+            ->route('peserta.keluarga.index')
             ->with('success', 'Anggota keluarga berhasil ditambahkan.');
     }
 
